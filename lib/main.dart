@@ -14,6 +14,12 @@ Future<Map<String, dynamic>> loadStudentData() async {
   return jsonDecode(jsonString) as Map<String, dynamic>;
 }
 
+int columnsFor(double width) {
+  if (width < 600) return 1;
+  if (width < 840) return 2;
+  return 3;
+}
+
 void main() {
   runApp(const MyApp());
 }
@@ -25,7 +31,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: '$studentId - $studentName',
+      title: 'Course Explorer',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.pink,
@@ -39,20 +45,23 @@ class MyApp extends StatelessWidget {
           elevation: 3,
         ),
       ),
-      home: const DashboardPage(),
+      home: const ResponsiveShell(),
     );
   }
 }
 
-class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+class ResponsiveShell extends StatefulWidget {
+  const ResponsiveShell({super.key});
 
   @override
-  State<DashboardPage> createState() => _DashboardPageState();
+  State<ResponsiveShell> createState() =>
+      _ResponsiveShellState();
 }
 
-class _DashboardPageState extends State<DashboardPage> {
+class _ResponsiveShellState extends State<ResponsiveShell> {
   late Future<Map<String, dynamic>> studentFuture;
+
+  int currentIndex = 0;
 
   @override
   void initState() {
@@ -60,17 +69,82 @@ class _DashboardPageState extends State<DashboardPage> {
     studentFuture = loadStudentData();
   }
 
+  Widget buildCurrentPage(
+    Map<String, dynamic> data,
+  ) {
+    if (currentIndex == 0) {
+      return HomePage(data: data);
+    }
+
+    if (currentIndex == 1) {
+      return CoursesPage(data: data);
+    }
+
+    return ProfilePage(data: data);
+  }
+
+  NavigationBar buildNavigationBar() {
+    return NavigationBar(
+      selectedIndex: currentIndex,
+      onDestinationSelected: (index) {
+        setState(() {
+          currentIndex = index;
+        });
+      },
+      destinations: const [
+        NavigationDestination(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.school),
+          label: 'Courses',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ],
+    );
+  }
+
+  NavigationRail buildNavigationRail() {
+    return NavigationRail(
+      selectedIndex: currentIndex,
+      onDestinationSelected: (index) {
+        setState(() {
+          currentIndex = index;
+        });
+      },
+      destinations: const [
+        NavigationRailDestination(
+          icon: Icon(Icons.home),
+          label: Text('Home'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.school),
+          label: Text('Courses'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.person),
+          label: Text('Profile'),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Learning Dashboard'),
+        title: const Text('Course Explorer'),
         centerTitle: true,
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: studentFuture,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState ==
+              ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
                 color: Colors.pink,
@@ -94,244 +168,526 @@ class _DashboardPageState extends State<DashboardPage> {
           }
 
           final data = snapshot.data!;
-          final student =
-              data['student'] as Map<String, dynamic>;
-          final courses = data['courses'] as List<dynamic>;
 
-          final completed = courses
-              .where(
-                (course) => course['status'] == 'done',
-              )
-              .length;
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final page = buildCurrentPage(data);
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Profil mahasiswa
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            const CircleAvatar(
-                              radius: 40,
-                              backgroundImage:
-                                  AssetImage('assets/profile.jpeg'),
-                            ),
-                            Positioned(
-                              top: -10,
-                              right: -5,
-                              child: Icon(
-                                Icons.local_florist,
-                                color: Colors.pink,
-                                size: 28,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                student['name'] as String,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              Text(
-                                student['nim'] as String,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.pink.shade700,
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              const Text(
-                                'Mahasiswa',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+              if (constraints.maxWidth < 840) {
+                return page;
+              }
+
+              return Row(
+                children: [
+                  buildNavigationRail(),
+                  const VerticalDivider(width: 1),
+                  Expanded(
+                    child: page,
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      ),
+      bottomNavigationBar: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 840) {
+            return buildNavigationBar();
+          }
+
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+  }
+}
+
+class StudentHeader extends StatelessWidget {
+  final Map<String, dynamic> student;
+
+  const StudentHeader({
+    super.key,
+    required this.student,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            const CircleAvatar(
+              radius: 40,
+              backgroundImage:
+                  AssetImage('assets/profile.jpeg'),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    student['name'] as String,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Kasus A - RenderFlex Overflow
-                Row(
-                  children: [
-                    const Icon(Icons.info),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '$studentId - $studentName - Ini adalah teks yang sangat panjang untuk menguji layout',
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Identitas
-                Center(
-                  child: Text(
-                    '$studentId - $studentName',
+                  const SizedBox(height: 5),
+                  Text(
+                    student['nim'] as String,
                     style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                       color: Colors.pink.shade700,
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-                const SizedBox(height: 20),
+class HomePage extends StatelessWidget {
+  final Map<String, dynamic> data;
 
-                // Ringkasan
-                const Text(
-                  'Progress Belajar',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+  const HomePage({
+    super.key,
+    required this.data,
+  });
 
-                const SizedBox(height: 10),
+  @override
+  Widget build(BuildContext context) {
+    final student =
+        data['student'] as Map<String, dynamic>;
 
-                Card(
-                  color: Colors.pink.shade100,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceAround,
-                      children: [
-                        Column(
-                          children: [
-                            Icon(
-                              Icons.menu_book,
-                              color: Colors.pink.shade700,
-                              size: 32,
-                            ),
-                            const SizedBox(height: 5),
-                            Text(
-                              '${courses.length}',
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Text('Total Course'),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            Icon(
-                              Icons.check_circle,
-                              color: Colors.pink.shade700,
-                              size: 32,
-                            ),
-                            const SizedBox(height: 5),
-                            Text(
-                              '$completed',
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Text('Selesai'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+    final courses = data['courses'] as List<dynamic>;
 
-                const SizedBox(height: 20),
+    final completed = courses
+        .where(
+          (course) => course['status'] == 'done',
+        )
+        .length;
 
-                // Daftar course
-                const Text(
-                  'Daftar Course',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          StudentHeader(student: student),
 
-                const SizedBox(height: 10),
+          const SizedBox(height: 20),
 
-                ...courses.map((course) {
-                  final item =
-                      course as Map<String, dynamic>;
+          const Text(
+            'Progress Belajar',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
 
-                  final status =
-                      item['status'] as String;
+          const SizedBox(height: 10),
 
-                  IconData icon;
-
-                  if (status == 'done') {
-                    icon = Icons.check_circle;
-                  } else if (status == 'active') {
-                    icon = Icons.play_circle;
-                  } else {
-                    icon = Icons.schedule;
-                  }
-
-                  return Card(
-                    margin: const EdgeInsets.only(
-                      bottom: 10,
-                    ),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor:
-                            Colors.pink.shade100,
-                        child: Icon(
-                          icon,
-                          color: Colors.pink.shade700,
-                        ),
+          Card(
+            color: Colors.pink.shade100,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment:
+                    MainAxisAlignment.spaceAround,
+                children: [
+                  Column(
+                    children: [
+                      Icon(
+                        Icons.menu_book,
+                        color: Colors.pink.shade700,
+                        size: 32,
                       ),
-                      title: Text(
-                        item['title'] as String,
+                      const SizedBox(height: 5),
+                      Text(
+                        '${courses.length}',
                         style: const TextStyle(
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      subtitle: Text(
-                        '${item['code']} • ${item['credits']} SKS',
+                      const Text('Total Course'),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: Colors.pink.shade700,
+                        size: 32,
                       ),
-                      trailing: Text(
-                        status == 'done'
-                            ? 'Selesai'
-                            : status == 'active'
-                                ? 'Aktif'
-                                : 'Rencana',
-                        style: TextStyle(
-                          color: Colors.pink.shade700,
+                      const SizedBox(height: 5),
+                      Text(
+                        '$completed',
+                        style: const TextStyle(
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                  );
-                }),
-              ],
+                      const Text('Selesai'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CoursesPage extends StatelessWidget {
+  final Map<String, dynamic> data;
+
+  const CoursesPage({
+    super.key,
+    required this.data,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final courses = data['courses'] as List<dynamic>;
+
+    return Column(
+    children: [
+      const Text('Daftar Course'),
+      ListView.builder(
+        itemCount: courses.length,
+        itemBuilder: (context, index) {
+          final course =
+              courses[index] as Map<String, dynamic>;
+
+          return ListTile(
+            title: Text(course['title'] as String),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate:
+              SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount:
+                columnsFor(constraints.maxWidth),
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.8,
+          ),
+          itemCount: courses.length,
+          itemBuilder: (context, index) {
+            final course =
+                courses[index] as Map<String, dynamic>;
+
+            return CourseCard(
+              course: course,
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class CourseCard extends StatefulWidget {
+  final Map<String, dynamic> course;
+
+  const CourseCard({
+    super.key,
+    required this.course,
+  });
+
+  @override
+  State<CourseCard> createState() =>
+      _CourseCardState();
+}
+
+class _CourseCardState extends State<CourseCard> {
+  bool isFavorite = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final status = widget.course['status'] as String;
+
+    IconData statusIcon;
+
+    if (status == 'done') {
+      statusIcon = Icons.check_circle;
+    } else if (status == 'active') {
+      statusIcon = Icons.play_circle;
+    } else {
+      statusIcon = Icons.schedule;
+    }
+
+    return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CourseDetailPage(
+                course: widget.course,
+              ),
             ),
           );
         },
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment:
+                MainAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween,
+                children: [
+                  CircleAvatar(
+                    backgroundColor:
+                        Colors.pink.shade100,
+                    child: Icon(
+                      statusIcon,
+                      color: Colors.pink.shade700,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        isFavorite = !isFavorite;
+                      });
+                    },
+                    icon: Icon(
+                      isFavorite
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: isFavorite
+                          ? Colors.pink
+                          : Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                widget.course['title'] as String,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 4),
+
+              Text(
+                '${widget.course['code']} • ${widget.course['credits']} SKS',
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 4),
+
+              Text(
+                status == 'done'
+                    ? 'Selesai'
+                    : status == 'active'
+                        ? 'Aktif'
+                        : 'Rencana',
+                style: TextStyle(
+                  color: Colors.pink.shade700,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CourseDetailPage extends StatelessWidget {
+  final Map<String, dynamic> course;
+
+  const CourseDetailPage({
+    super.key,
+    required this.course,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final status = course['status'] as String;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Course Detail'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: [
+            Text(
+              course['title'] as String,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            Text('Code: ${course['code']}'),
+
+            const SizedBox(height: 8),
+
+            Text(
+              'Credits: ${course['credits']} SKS',
+            ),
+
+            const SizedBox(height: 8),
+
+            Text('Status: $status'),
+
+            const SizedBox(height: 20),
+
+            Text('Nama: $studentName'),
+
+            const SizedBox(height: 8),
+
+            Text('NIM: $studentId'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ProfilePage extends StatefulWidget {
+  final Map<String, dynamic> data;
+
+  const ProfilePage({
+    super.key,
+    required this.data,
+  });
+
+  @override
+  State<ProfilePage> createState() =>
+      _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    final student =
+        widget.data['student'] as Map<String, dynamic>;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          StudentHeader(student: student),
+
+          const SizedBox(height: 20),
+           Row(
+  children: [
+    const Icon(Icons.info),
+    const SizedBox(width: 8),
+    Expanded(
+      child: Text(
+        '$studentId - $studentName - teks sangat panjang untuk menguji RenderFlex overflow',
+      ),
+    ),
+  ],
+),
+          Form(
+            key: formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  initialValue: studentName,
+                  decoration: const InputDecoration(
+                    labelText: 'Nama',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  initialValue: studentId,
+                  decoration: const InputDecoration(
+                    labelText: 'NIM',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  minLines: 3,
+                  maxLines: 5,
+                  decoration: const InputDecoration(
+                    labelText: 'Komentar',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null ||
+                        value.trim().length < 5) {
+                      return 'Komentar minimal 5 karakter';
+                    }
+
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (formKey.currentState!
+                          .validate()) {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Feedback berhasil dikirim',
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    child: const Text(
+                      'Kirim Feedback',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
