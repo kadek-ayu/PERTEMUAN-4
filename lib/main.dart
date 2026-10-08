@@ -1,4 +1,5 @@
-import 'dart:convert';import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 const String studentName = 'Kadek Ayu Aulia';
@@ -56,8 +57,15 @@ class ResponsiveShell extends StatefulWidget {
 }
 
 class _ResponsiveShellState extends State<ResponsiveShell> {
+  // SHARED STATE
+  // Menyimpan Future data mahasiswa yang digunakan
+  // oleh bagian utama aplikasi.
   late Future<Map<String, dynamic>> studentFuture;
 
+  // SHARED STATE
+  // Menentukan halaman yang sedang aktif pada navigasi.
+  // Nilai ini digunakan oleh NavigationBar,
+  // NavigationRail, dan buildCurrentPage().
   int currentIndex = 0;
 
   @override
@@ -435,6 +443,9 @@ class CourseCard extends StatefulWidget {
 }
 
 class _CourseCardState extends State<CourseCard> {
+  // LOCAL STATE
+  // Hanya dimiliki oleh satu CourseCard.
+  // Perubahannya hanya memengaruhi CourseCard tersebut.
   bool isFavorite = false;
 
   @override
@@ -599,6 +610,8 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState
     extends State<ProfilePage> {
+  // LOCAL STATE
+  // Hanya digunakan oleh Form pada ProfilePage.
   final formKey =
       GlobalKey<FormState>();
 
