@@ -57,16 +57,13 @@ class ResponsiveShell extends StatefulWidget {
 }
 
 class _ResponsiveShellState extends State<ResponsiveShell> {
-  // SHARED STATE
-  // Menyimpan Future data mahasiswa yang digunakan
-  // oleh bagian utama aplikasi.
   late Future<Map<String, dynamic>> studentFuture;
 
-  // SHARED STATE
-  // Menentukan halaman yang sedang aktif pada navigasi.
-  // Nilai ini digunakan oleh NavigationBar,
-  // NavigationRail, dan buildCurrentPage().
   int currentIndex = 0;
+
+  // TAHAP 2:
+  // State favorite sekarang dimiliki oleh parent.
+  bool isFavorite = false;
 
   @override
   void initState() {
@@ -74,15 +71,43 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     studentFuture = loadStudentData();
   }
 
+  // TAHAP 2:
+  // Parent mengubah favorite melalui setState().
+  void changeFavorite(bool value) {
+    setState(() {
+      isFavorite = value;
+    });
+  }
+
   Widget buildCurrentPage(
     Map<String, dynamic> data,
   ) {
     if (currentIndex == 0) {
-      return HomePage(data: data);
+      return HomePage(
+        data: data,
+
+        // TAHAP 2:
+        // Nilai favorite diteruskan dari parent ke child.
+        isFavorite: isFavorite,
+
+        // TAHAP 2:
+        // Callback dari child kembali ke parent.
+        onFavoriteChanged: changeFavorite,
+      );
     }
 
     if (currentIndex == 1) {
-      return CoursesPage(data: data);
+      return CoursesPage(
+        data: data,
+
+        // TAHAP 2:
+        // Nilai favorite diteruskan dari parent ke child.
+        isFavorite: isFavorite,
+
+        // TAHAP 2:
+        // Callback dari child kembali ke parent.
+        onFavoriteChanged: changeFavorite,
+      );
     }
 
     return ProfilePage(data: data);
@@ -261,9 +286,19 @@ class StudentHeader extends StatelessWidget {
 class HomePage extends StatelessWidget {
   final Map<String, dynamic> data;
 
+  // TAHAP 2:
+  // Child menerima favorite dari parent.
+  final bool isFavorite;
+
+  // TAHAP 2:
+  // Child menerima callback untuk mengubah favorite parent.
+  final ValueChanged<bool> onFavoriteChanged;
+
   const HomePage({
     super.key,
     required this.data,
+    required this.isFavorite,
+    required this.onFavoriteChanged,
   });
 
   @override
@@ -352,9 +387,19 @@ class HomePage extends StatelessWidget {
 class CoursesPage extends StatelessWidget {
   final Map<String, dynamic> data;
 
+  // TAHAP 2:
+  // Child menerima state favorite dari ResponsiveShell.
+  final bool isFavorite;
+
+  // TAHAP 2:
+  // Child menerima callback dari ResponsiveShell.
+  final ValueChanged<bool> onFavoriteChanged;
+
   const CoursesPage({
     super.key,
     required this.data,
+    required this.isFavorite,
+    required this.onFavoriteChanged,
   });
 
   @override
@@ -394,6 +439,16 @@ class CoursesPage extends StatelessWidget {
                           const EdgeInsets.only(bottom: 12),
                       child: CourseCard(
                         course: course,
+
+                        // TAHAP 2:
+                        // Prop diteruskan lagi dari CoursesPage
+                        // ke CourseCard.
+                        isFavorite: isFavorite,
+
+                        // TAHAP 2:
+                        // Callback diteruskan lagi ke CourseCard.
+                        onFavoriteChanged:
+                            onFavoriteChanged,
                       ),
                     );
                   },
@@ -421,6 +476,14 @@ class CoursesPage extends StatelessWidget {
 
             return CourseCard(
               course: course,
+
+              // TAHAP 2:
+              // Prop diteruskan lagi ke CourseCard.
+              isFavorite: isFavorite,
+
+              // TAHAP 2:
+              // Callback diteruskan lagi ke CourseCard.
+              onFavoriteChanged: onFavoriteChanged,
             );
           },
         );
@@ -429,29 +492,29 @@ class CoursesPage extends StatelessWidget {
   }
 }
 
-class CourseCard extends StatefulWidget {
+class CourseCard extends StatelessWidget {
   final Map<String, dynamic> course;
+
+  // TAHAP 2:
+  // CourseCard tidak memiliki isFavorite sendiri.
+  // Nilainya berasal dari parent.
+  final bool isFavorite;
+
+  // TAHAP 2:
+  // Callback digunakan CourseCard untuk meminta
+  // parent mengubah state favorite.
+  final ValueChanged<bool> onFavoriteChanged;
 
   const CourseCard({
     super.key,
     required this.course,
+    required this.isFavorite,
+    required this.onFavoriteChanged,
   });
 
   @override
-  State<CourseCard> createState() =>
-      _CourseCardState();
-}
-
-class _CourseCardState extends State<CourseCard> {
-  // LOCAL STATE
-  // Hanya dimiliki oleh satu CourseCard.
-  // Perubahannya hanya memengaruhi CourseCard tersebut.
-  bool isFavorite = false;
-
-  @override
   Widget build(BuildContext context) {
-    final status =
-        widget.course['status'] as String;
+    final status = course['status'] as String;
 
     IconData statusIcon;
 
@@ -472,7 +535,7 @@ class _CourseCardState extends State<CourseCard> {
             MaterialPageRoute(
               builder: (context) =>
                   CourseDetailPage(
-                course: widget.course,
+                course: course,
               ),
             ),
           );
@@ -497,9 +560,10 @@ class _CourseCardState extends State<CourseCard> {
                   ),
                   IconButton(
                     onPressed: () {
-                      setState(() {
-                        isFavorite = !isFavorite;
-                      });
+                      // TAHAP 2:
+                      // Child tidak mengubah state sendiri.
+                      // Child mengirim perubahan ke parent.
+                      onFavoriteChanged(!isFavorite);
                     },
                     icon: Icon(
                       isFavorite
@@ -514,7 +578,7 @@ class _CourseCardState extends State<CourseCard> {
               ),
               const SizedBox(height: 8),
               Text(
-                widget.course['title'] as String,
+                course['title'] as String,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
@@ -522,8 +586,8 @@ class _CourseCardState extends State<CourseCard> {
               ),
               const SizedBox(height: 4),
               Text(
-                '${widget.course['code']} • '
-                '${widget.course['credits']} SKS',
+                '${course['code']} • '
+                '${course['credits']} SKS',
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
@@ -556,8 +620,7 @@ class CourseDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status =
-        course['status'] as String;
+    final status = course['status'] as String;
 
     return Scaffold(
       appBar: AppBar(
@@ -610,8 +673,6 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState
     extends State<ProfilePage> {
-  // LOCAL STATE
-  // Hanya digunakan oleh Form pada ProfilePage.
   final formKey =
       GlobalKey<FormState>();
 
