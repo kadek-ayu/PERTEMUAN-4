@@ -1,6 +1,4 @@
-import 'dart:convert';
-
-import 'package:flutter/material.dart';
+import 'dart:convert';import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 const String studentName = 'Kadek Ayu Aulia';
@@ -54,8 +52,7 @@ class ResponsiveShell extends StatefulWidget {
   const ResponsiveShell({super.key});
 
   @override
-  State<ResponsiveShell> createState() =>
-      _ResponsiveShellState();
+  State<ResponsiveShell> createState() => _ResponsiveShellState();
 }
 
 class _ResponsiveShellState extends State<ResponsiveShell> {
@@ -143,8 +140,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
       body: FutureBuilder<Map<String, dynamic>>(
         future: studentFuture,
         builder: (context, snapshot) {
-          if (snapshot.connectionState ==
-              ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
                 color: Colors.pink,
@@ -220,14 +216,14 @@ class StudentHeader extends StatelessWidget {
           children: [
             const CircleAvatar(
               radius: 40,
-              backgroundImage:
-                  AssetImage('assets/profile.jpeg'),
+              backgroundImage: AssetImage(
+                'assets/profile.jpeg',
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     student['name'] as String,
@@ -267,7 +263,8 @@ class HomePage extends StatelessWidget {
     final student =
         data['student'] as Map<String, dynamic>;
 
-    final courses = data['courses'] as List<dynamic>;
+    final courses =
+        data['courses'] as List<dynamic>;
 
     final completed = courses
         .where(
@@ -278,13 +275,10 @@ class HomePage extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           StudentHeader(student: student),
-
           const SizedBox(height: 20),
-
           const Text(
             'Progress Belajar',
             style: TextStyle(
@@ -292,9 +286,7 @@ class HomePage extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 10),
-
           Card(
             color: Colors.pink.shade100,
             child: Padding(
@@ -359,25 +351,49 @@ class CoursesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final courses = data['courses'] as List<dynamic>;
+    final courses =
+        data['courses'] as List<dynamic>;
 
-    return Column(
-    children: [
-      const Text('Daftar Course'),
-      ListView.builder(
-        itemCount: courses.length,
-        itemBuilder: (context, index) {
-          final course =
-              courses[index] as Map<String, dynamic>;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 600) {
+          return Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Daftar Course',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: courses.length,
+                  itemBuilder: (context, index) {
+                    final course =
+                        courses[index]
+                            as Map<String, dynamic>;
 
-          return ListTile(
-            title: Text(course['title'] as String),
+                    return Padding(
+                      padding:
+                          const EdgeInsets.only(bottom: 12),
+                      child: CourseCard(
+                        course: course,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           );
-        },
-      ),
-    ],
-  );
-}
+        }
 
         return GridView.builder(
           padding: const EdgeInsets.all(16),
@@ -392,7 +408,8 @@ class CoursesPage extends StatelessWidget {
           itemCount: courses.length,
           itemBuilder: (context, index) {
             final course =
-                courses[index] as Map<String, dynamic>;
+                courses[index]
+                    as Map<String, dynamic>;
 
             return CourseCard(
               course: course,
@@ -422,7 +439,8 @@ class _CourseCardState extends State<CourseCard> {
 
   @override
   Widget build(BuildContext context) {
-    final status = widget.course['status'] as String;
+    final status =
+        widget.course['status'] as String;
 
     IconData statusIcon;
 
@@ -441,7 +459,8 @@ class _CourseCardState extends State<CourseCard> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => CourseDetailPage(
+              builder: (context) =>
+                  CourseDetailPage(
                 course: widget.course,
               ),
             ),
@@ -482,9 +501,7 @@ class _CourseCardState extends State<CourseCard> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 8),
-
               Text(
                 widget.course['title'] as String,
                 textAlign: TextAlign.center,
@@ -492,16 +509,13 @@ class _CourseCardState extends State<CourseCard> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 4),
-
               Text(
-                '${widget.course['code']} • ${widget.course['credits']} SKS',
+                '${widget.course['code']} • '
+                '${widget.course['credits']} SKS',
                 textAlign: TextAlign.center,
               ),
-
               const SizedBox(height: 4),
-
               Text(
                 status == 'done'
                     ? 'Selesai'
@@ -531,7 +545,8 @@ class CourseDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status = course['status'] as String;
+    final status =
+        course['status'] as String;
 
     return Scaffold(
       appBar: AppBar(
@@ -550,27 +565,17 @@ class CourseDetailPage extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 16),
-
             Text('Code: ${course['code']}'),
-
             const SizedBox(height: 8),
-
             Text(
               'Credits: ${course['credits']} SKS',
             ),
-
             const SizedBox(height: 8),
-
             Text('Status: $status'),
-
             const SizedBox(height: 20),
-
             Text('Nama: $studentName'),
-
             const SizedBox(height: 8),
-
             Text('NIM: $studentId'),
           ],
         ),
@@ -592,13 +597,16 @@ class ProfilePage extends StatefulWidget {
       _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-  final formKey = GlobalKey<FormState>();
+class _ProfilePageState
+    extends State<ProfilePage> {
+  final formKey =
+      GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     final student =
-        widget.data['student'] as Map<String, dynamic>;
+        widget.data['student']
+            as Map<String, dynamic>;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -607,47 +615,47 @@ class _ProfilePageState extends State<ProfilePage> {
             CrossAxisAlignment.start,
         children: [
           StudentHeader(student: student),
-
           const SizedBox(height: 20),
-           Row(
-  children: [
-    const Icon(Icons.info),
-    const SizedBox(width: 8),
-    Expanded(
-      child: Text(
-        '$studentId - $studentName - teks sangat panjang untuk menguji RenderFlex overflow',
-      ),
-    ),
-  ],
-),
+          Row(
+            children: [
+              const Icon(Icons.info),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '$studentId - $studentName - '
+                  'teks sangat panjang untuk menguji '
+                  'RenderFlex overflow',
+                ),
+              ),
+            ],
+          ),
           Form(
             key: formKey,
             child: Column(
               children: [
                 TextFormField(
                   initialValue: studentName,
-                  decoration: const InputDecoration(
+                  decoration:
+                      const InputDecoration(
                     labelText: 'Nama',
                     border: OutlineInputBorder(),
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
                 TextFormField(
                   initialValue: studentId,
-                  decoration: const InputDecoration(
+                  decoration:
+                      const InputDecoration(
                     labelText: 'NIM',
                     border: OutlineInputBorder(),
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
                 TextFormField(
                   minLines: 3,
                   maxLines: 5,
-                  decoration: const InputDecoration(
+                  decoration:
+                      const InputDecoration(
                     labelText: 'Komentar',
                     border: OutlineInputBorder(),
                   ),
@@ -660,17 +668,16 @@ class _ProfilePageState extends State<ProfilePage> {
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 16),
-
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
                       if (formKey.currentState!
                           .validate()) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(
                           const SnackBar(
                             content: Text(
                               'Feedback berhasil dikirim',
