@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-
 import 'package:provider/provider.dart';
 
 import 'course_state.dart';
@@ -22,17 +21,17 @@ int columnsFor(double width) {
 // TAHAP 8 - MODEL COURSE
 // TAHAP 9 - COURSE SERVICE
 // TAHAP 10 - REPOSITORY PATTERN
+// TAHAP 11 - ASYNC STATE
+
 void main() {
   runApp(
-    ChangeNotifierProvider<CourseState>(
+    ChangeNotifierProvider<CourseProvider>(
       create: (_) {
-        final state = CourseState(
+        final provider = CourseProvider(
           CourseRepository(CourseService()),
         );
-
-        state.loadCourses();
-
-        return state;
+        provider.loadCourses();
+        return provider;
       },
       child: const MyApp(),
     ),
@@ -282,10 +281,8 @@ class HomePage extends StatelessWidget {
     final student =
         data['student'] as Map<String, dynamic>;
 
-    // Data course diambil dari Provider,
-    // yang memuat data melalui Repository.
-    final courseState = context.watch<CourseState>();
-    final courses = courseState.courses;
+    final courseProvider = context.watch<CourseProvider>();
+    final courses = courseProvider.courses;
 
     final completed = courses
         .where((course) => course.status == 'done')
@@ -370,11 +367,11 @@ class CoursesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Daftar course berasal dari Provider.
-    final courseState = context.watch<CourseState>();
-    final courses = courseState.courses;
+    final courseProvider = context.watch<CourseProvider>();
+    final courses = courseProvider.courses;
 
-    if (courseState.isLoading) {
+    // Tahap 11: tampilkan loading saat data dimuat.
+    if (courseProvider.isLoading) {
       return const Center(
         child: CircularProgressIndicator(
           color: Colors.pink,
@@ -382,19 +379,33 @@ class CoursesPage extends StatelessWidget {
       );
     }
 
-    if (courseState.errorMessage != null) {
+    // Tahap 11: tampilkan pesan jika terjadi error.
+    if (courseProvider.error != null) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Text(
-            'Gagal memuat course:\n'
-            '${courseState.errorMessage}',
-            textAlign: TextAlign.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Gagal memuat course:\n'
+                '${courseProvider.error}',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () {
+                  context.read<CourseProvider>().loadCourses();
+                },
+                child: const Text('Coba Lagi'),
+              ),
+            ],
           ),
         ),
       );
     }
 
+    // Tahap 11: tampilkan daftar ketika data berhasil dimuat.
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 600;
@@ -409,8 +420,7 @@ class CoursesPage extends StatelessWidget {
                 8,
               ),
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     'Daftar Course',
@@ -422,7 +432,7 @@ class CoursesPage extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     'Jumlah Favorite: '
-                    '${courseState.favorites.length}',
+                    '${courseProvider.favorites.length}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                     ),
@@ -450,9 +460,8 @@ class CoursesPage extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       gridDelegate:
                           SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: columnsFor(
-                          constraints.maxWidth,
-                        ),
+                        crossAxisCount:
+                            columnsFor(constraints.maxWidth),
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 12,
                         childAspectRatio: 1.8,
@@ -521,7 +530,7 @@ class CourseCard extends StatelessWidget {
                       color: Colors.pink.shade700,
                     ),
                   ),
-                  Consumer<CourseState>(
+                  Consumer<CourseProvider>(
                     builder: (context, state, child) {
                       final isFavorite =
                           state.favorites.contains(course.code);
@@ -529,7 +538,7 @@ class CourseCard extends StatelessWidget {
                       return IconButton(
                         onPressed: () {
                           context
-                              .read<CourseState>()
+                              .read<CourseProvider>()
                               .toggleFavorite(course.code);
                         },
                         icon: Icon(
