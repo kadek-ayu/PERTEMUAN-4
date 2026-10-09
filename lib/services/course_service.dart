@@ -7,6 +7,8 @@ import '../models/course.dart';
 
 class CourseService {
   // Membaca dan mengubah JSON asset menjadi Map.
+  // TAHAP 15 - KASUS C
+  // Simulasi kegagalan pemuatan data.
   Future<Map<String, dynamic>> _loadJsonData() async {
     final jsonString = await rootBundle.loadString(
       'assets/data/student_data.json',

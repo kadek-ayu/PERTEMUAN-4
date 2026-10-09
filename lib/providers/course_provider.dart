@@ -27,7 +27,11 @@ class CourseProvider extends ChangeNotifier {
 
     notifyListeners();
   }
-
+// TAHAP 15 - KASUS A: DEBUGGING STATE MANAGEMENT
+  // Pengujian: UI tidak menerima notifikasi perubahan state.
+  // Ambil screenshot saat UI belum langsung diperbarui.
+  // Setelah pengujian, aktifkan kembali notifyListeners().
+  // notifyListeners();
   List<Course> get favoriteCourses {
     return courses
         .where((course) => favorites.contains(course.code))

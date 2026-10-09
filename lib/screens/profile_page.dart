@@ -11,6 +11,8 @@ class ProfilePage extends StatefulWidget {
     required this.data,
   });
 
+  // TAHAP 15 - KASUS D
+  // Pastikan widget masih aktif sebelum setState.
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }

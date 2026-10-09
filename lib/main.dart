@@ -49,6 +49,11 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+// TAHAP 15 - KASUS B
+  // PENGUJIAN SEMENTARA:
+  // Context ini berada di atas ChangeNotifierProvider.
+  // Pemanggilan read di bawah ini seharusnya memicu
+  // ProviderNotFoundException saat aplikasi dijalankan.
 
 class ResponsiveShell extends StatefulWidget {
   const ResponsiveShell({super.key});
