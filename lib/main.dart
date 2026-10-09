@@ -6,6 +6,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
 
 import 'course_state.dart';
+import 'models/course.dart';
 
 const String studentName = 'Kadek Ayu Aulia';
 const String studentId = '2415051041';
@@ -24,7 +25,9 @@ int columnsFor(double width) {
   return 3;
 }
 
-// TAHAP 6 - MEMASANG PROVIDER PADA WIDGET TREE
+// TAHAP 6 - PROVIDER PADA WIDGET TREE
+// TAHAP 7 - context.watch(), context.read(), dan Consumer
+// TAHAP 8 - MODEL COURSE DAN PARSING JSON
 void main() {
   runApp(
     ChangeNotifierProvider<CourseState>(
@@ -64,7 +67,8 @@ class ResponsiveShell extends StatefulWidget {
   const ResponsiveShell({super.key});
 
   @override
-  State<ResponsiveShell> createState() => _ResponsiveShellState();
+  State<ResponsiveShell> createState() =>
+      _ResponsiveShellState();
 }
 
 class _ResponsiveShellState extends State<ResponsiveShell> {
@@ -72,50 +76,19 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
 
   int currentIndex = 0;
 
-  // TAHAP 3 - LIFTING STATE UP & SINGLE SOURCE OF TRUTH
-  bool isFavorite = false;
-
-  // TAHAP 4 - VALUENOTIFIER
-  // Menyimpan satu nilai sederhana berupa jumlah favorite.
-  final ValueNotifier<int> favoriteCount = ValueNotifier<int>(0);
-
   @override
   void initState() {
     super.initState();
     studentFuture = loadStudentData();
   }
 
-  // TAHAP 3 - CALLBACK
-  void changeFavorite(bool value) {
-    setState(() {
-      isFavorite = value;
-    });
-  }
-
-  // TAHAP 4 - MENGUBAH VALUE
-  void changeFavoriteCount() {
-    favoriteCount.value++;
-  }
-
   Widget buildCurrentPage(Map<String, dynamic> data) {
     if (currentIndex == 0) {
-      return HomePage(
-        data: data,
-        isFavorite: isFavorite,
-        onFavoriteChanged: changeFavorite,
-      );
+      return HomePage(data: data);
     }
 
     if (currentIndex == 1) {
-      return CoursesPage(
-        data: data,
-        isFavorite: isFavorite,
-        onFavoriteChanged: changeFavorite,
-
-        // TAHAP 4 - VALUE NOTIFIER
-        favoriteCount: favoriteCount,
-        onFavoriteCountChanged: changeFavoriteCount,
-      );
+      return CoursesPage(data: data);
     }
 
     return ProfilePage(data: data);
@@ -181,7 +154,8 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
       body: FutureBuilder<Map<String, dynamic>>(
         future: studentFuture,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState ==
+              ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
                 color: Colors.pink,
@@ -218,9 +192,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                 children: [
                   buildNavigationRail(),
                   const VerticalDivider(width: 1),
-                  Expanded(
-                    child: page,
-                  ),
+                  Expanded(child: page),
                 ],
               );
             },
@@ -294,24 +266,27 @@ class StudentHeader extends StatelessWidget {
 class HomePage extends StatelessWidget {
   final Map<String, dynamic> data;
 
-  // TAHAP 3
-  final bool isFavorite;
-  final ValueChanged<bool> onFavoriteChanged;
-
   const HomePage({
     super.key,
     required this.data,
-    required this.isFavorite,
-    required this.onFavoriteChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    final student = data['student'] as Map<String, dynamic>;
-    final courses = data['courses'] as List<dynamic>;
+    final student =
+        data['student'] as Map<String, dynamic>;
+
+    // TAHAP 8 - Mengubah data JSON menjadi objek Course.
+    final courses = (data['courses'] as List<dynamic>)
+        .map(
+          (item) => Course.fromJson(
+            item as Map<String, dynamic>,
+          ),
+        )
+        .toList();
 
     final completed = courses
-        .where((course) => course['status'] == 'done')
+        .where((course) => course.status == 'done')
         .length;
 
     return SingleChildScrollView(
@@ -334,7 +309,8 @@ class HomePage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment:
+                    MainAxisAlignment.spaceAround,
                 children: [
                   Column(
                     children: [
@@ -385,150 +361,92 @@ class HomePage extends StatelessWidget {
 class CoursesPage extends StatelessWidget {
   final Map<String, dynamic> data;
 
-  // TAHAP 3
-  final bool isFavorite;
-  final ValueChanged<bool> onFavoriteChanged;
-
-  // TAHAP 4 - VALUE NOTIFIER
-  final ValueNotifier<int> favoriteCount;
-  final VoidCallback onFavoriteCountChanged;
-
   const CoursesPage({
     super.key,
     required this.data,
-    required this.isFavorite,
-    required this.onFavoriteChanged,
-    required this.favoriteCount,
-    required this.onFavoriteCountChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    final courses = data['courses'] as List<dynamic>;
+    // TAHAP 8 - Parsing JSON menjadi List<Course>.
+    final courses = (data['courses'] as List<dynamic>)
+        .map(
+          (item) => Course.fromJson(
+            item as Map<String, dynamic>,
+          ),
+        )
+        .toList();
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < 600) {
-          return Column(
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
+        final isCompact = constraints.maxWidth < 600;
+
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                16,
+                16,
+                16,
+                8,
+              ),
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  const Text(
                     'Daftar Course',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ),
-
-              // TAHAP 4 - VALUE LISTENABLE BUILDER
-              ValueListenableBuilder<int>(
-                valueListenable: favoriteCount,
-                builder: (context, value, child) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
+                  const SizedBox(height: 8),
+                  // TAHAP 7 - context.watch()
+                  Text(
+                    'Jumlah Favorite: '
+                    '${context.watch<CourseState>().favorites.length}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Jumlah Favorite: $value',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        ElevatedButton(
-                          onPressed: onFavoriteCountChanged,
-                          child: const Text('Tambah'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 12),
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: courses.length,
-                  itemBuilder: (context, index) {
-                    final course =
-                        courses[index] as Map<String, dynamic>;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: CourseCard(
-                        course: course,
-                        isFavorite: isFavorite,
-                        onFavoriteChanged: onFavoriteChanged,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        }
-
-        return Column(
-          children: [
-            // TAHAP 4 - VALUE LISTENABLE BUILDER
-            ValueListenableBuilder<int>(
-              valueListenable: favoriteCount,
-              builder: (context, value, child) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    16,
-                    16,
-                    16,
-                    0,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Jumlah Favorite: $value',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: onFavoriteCountChanged,
-                        child: const Text('Tambah'),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                ],
+              ),
             ),
             Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate:
-                    SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: columnsFor(constraints.maxWidth),
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.8,
-                ),
-                itemCount: courses.length,
-                itemBuilder: (context, index) {
-                  final course =
-                      courses[index] as Map<String, dynamic>;
-
-                  return CourseCard(
-                    course: course,
-                    isFavorite: isFavorite,
-                    onFavoriteChanged: onFavoriteChanged,
-                  );
-                },
-              ),
+              child: isCompact
+                  ? ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: courses.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: 12,
+                          ),
+                          child: CourseCard(
+                            course: courses[index],
+                          ),
+                        );
+                      },
+                    )
+                  : GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate:
+                          SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: columnsFor(
+                          constraints.maxWidth,
+                        ),
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 1.8,
+                      ),
+                      itemCount: courses.length,
+                      itemBuilder: (context, index) {
+                        return CourseCard(
+                          course: courses[index],
+                        );
+                      },
+                    ),
             ),
           ],
         );
@@ -538,28 +456,21 @@ class CoursesPage extends StatelessWidget {
 }
 
 class CourseCard extends StatelessWidget {
-  final Map<String, dynamic> course;
-
-  // TAHAP 3
-  final bool isFavorite;
-  final ValueChanged<bool> onFavoriteChanged;
+  // TAHAP 8 - CourseCard menerima objek Course.
+  final Course course;
 
   const CourseCard({
     super.key,
     required this.course,
-    required this.isFavorite,
-    required this.onFavoriteChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    final status = course['status'] as String;
-
     IconData statusIcon;
 
-    if (status == 'done') {
+    if (course.status == 'done') {
       statusIcon = Icons.check_circle;
-    } else if (status == 'active') {
+    } else if (course.status == 'active') {
       statusIcon = Icons.play_circle;
     } else {
       statusIcon = Icons.schedule;
@@ -584,7 +495,8 @@ class CourseCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween,
                 children: [
                   CircleAvatar(
                     backgroundColor: Colors.pink.shade100,
@@ -593,23 +505,36 @@ class CourseCard extends StatelessWidget {
                       color: Colors.pink.shade700,
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      // TAHAP 3
-                      onFavoriteChanged(!isFavorite);
+                  // TAHAP 7 - Consumer membatasi area rebuild.
+                  Consumer<CourseState>(
+                    builder: (context, courseState, child) {
+                      final isFavorite = courseState
+                          .favorites
+                          .contains(course.code);
+
+                      return IconButton(
+                        // context.read() untuk menjalankan aksi.
+                        onPressed: () {
+                          context
+                              .read<CourseState>()
+                              .toggleFavorite(course.code);
+                        },
+                        icon: Icon(
+                          isFavorite
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: isFavorite
+                              ? Colors.pink
+                              : Colors.grey,
+                        ),
+                      );
                     },
-                    icon: Icon(
-                      isFavorite
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      color: isFavorite ? Colors.pink : Colors.grey,
-                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
-                course['title'] as String,
+                course.title,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
@@ -617,14 +542,14 @@ class CourseCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '${course['code']} • ${course['credits']} SKS',
+                '${course.code} • ${course.credits} SKS',
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
               Text(
-                status == 'done'
+                course.status == 'done'
                     ? 'Selesai'
-                    : status == 'active'
+                    : course.status == 'active'
                         ? 'Aktif'
                         : 'Rencana',
                 style: TextStyle(
@@ -641,7 +566,8 @@ class CourseCard extends StatelessWidget {
 }
 
 class CourseDetailPage extends StatelessWidget {
-  final Map<String, dynamic> course;
+  // TAHAP 8 - Detail menerima objek Course.
+  final Course course;
 
   const CourseDetailPage({
     super.key,
@@ -650,8 +576,6 @@ class CourseDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status = course['status'] as String;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Course Detail'),
@@ -662,18 +586,18 @@ class CourseDetailPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              course['title'] as String,
+              course.title,
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            Text('Code: ${course['code']}'),
+            Text('Code: ${course.code}'),
             const SizedBox(height: 8),
-            Text('Credits: ${course['credits']} SKS'),
+            Text('Credits: ${course.credits} SKS'),
             const SizedBox(height: 8),
-            Text('Status: $status'),
+            Text('Status: ${course.status}'),
             const SizedBox(height: 20),
             Text('Nama: $studentName'),
             const SizedBox(height: 8),
@@ -767,7 +691,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(
                           const SnackBar(
                             content: Text(
                               'Feedback berhasil dikirim',
