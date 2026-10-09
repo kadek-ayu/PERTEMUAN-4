@@ -30,6 +30,8 @@ class HomePage extends StatelessWidget {
         children: [
           StudentHeader(student: student),
           const SizedBox(height: 16),
+
+          // Progress Belajar
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -94,6 +96,54 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
+
+          const SizedBox(height: 20),
+
+          // Course Terbaru
+          const Text(
+            'Course Terbaru',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          if (courseProvider.isLoading)
+            const Center(
+              child: CircularProgressIndicator(
+                color: Colors.pink,
+              ),
+            )
+          else if (courseProvider.error != null)
+            const Text('Data course tidak dapat dimuat.')
+          else if (courses.isEmpty)
+            const Text('Belum ada course.')
+          else
+            ...courses.take(3).map(
+              (course) => Card(
+                child: ListTile(
+                  title: Text(
+                    course.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '${course.code} • ${course.credits} SKS',
+                  ),
+                  trailing: Text(
+                    course.status,
+                    style: TextStyle(
+                      color: course.status.toLowerCase() == 'done'
+                          ? Colors.green
+                          : Colors.pink,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
