@@ -61,28 +61,29 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
   late Future<Map<String, dynamic>> studentFuture;
   int currentIndex = 0;
 
-  // ============================================================
   // TAHAP 3 - LIFTING STATE UP & SINGLE SOURCE OF TRUTH
-  // ============================================================
-  // State favorite dimiliki oleh parent.
-  // ResponsiveShell menjadi satu-satunya sumber state favorite.
+  
   bool isFavorite = false;
+  // TAHAP 4 - VALUENOTIFIER
+  // ValueNotifier digunakan untuk menyimpan satu nilai sederhana.
+  // Pada tahap ini nilai yang digunakan adalah jumlah favorite.
+  final ValueNotifier<int> favoriteCount = ValueNotifier<int>(0);
 
   @override
   void initState() {
     super.initState();
     studentFuture = loadStudentData();
   }
-
- 
-  // TAHAP 3 - CALLBACK DARI CHILD KE PARENT
- 
-  // Parent menerima perubahan dari child,
-  // kemudian mengubah state menggunakan setState().
+  // TAHAP 3 - CALLBACK
   void changeFavorite(bool value) {
     setState(() {
       isFavorite = value;
     });
+  }
+  // TAHAP 4 - MENGUBAH VALUE
+  // ValueNotifier dapat diubah melalui property .value.
+  void changeFavoriteCount() {
+    favoriteCount.value++;
   }
 
   Widget buildCurrentPage(
@@ -91,16 +92,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     if (currentIndex == 0) {
       return HomePage(
         data: data,
-
-        // TAHAP 3
-        // Data favorite dikirim dari parent ke child.
-       
         isFavorite: isFavorite,
-
-      
-        // TAHAP 3
-        // Aksi perubahan dikirim melalui callback.
-        
         onFavoriteChanged: changeFavorite,
       );
     }
@@ -108,18 +100,20 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     if (currentIndex == 1) {
       return CoursesPage(
         data: data,
-
-        // ======================================================
-        // TAHAP 3
-        // Data favorite dikirim dari parent ke child.
-        // ======================================================
         isFavorite: isFavorite,
-
-        // ======================================================
-        // TAHAP 3
-        // Callback dikirim dari parent ke child.
-        // ======================================================
         onFavoriteChanged: changeFavorite,
+
+        // ========================================================
+        // TAHAP 4
+        // ValueNotifier dikirim ke CoursesPage.
+        // ========================================================
+        favoriteCount: favoriteCount,
+
+        // ========================================================
+        // TAHAP 4
+        // Callback untuk mengubah ValueNotifier.
+        // ========================================================
+        onFavoriteCountChanged: changeFavoriteCount,
       );
     }
 
@@ -299,17 +293,8 @@ class StudentHeader extends StatelessWidget {
 class HomePage extends StatelessWidget {
   final Map<String, dynamic> data;
 
-  // ============================================================
   // TAHAP 3
-  // HomePage menerima state dari parent.
-  // HomePage tidak membuat salinan state sendiri.
-  // ============================================================
   final bool isFavorite;
-
-  // ============================================================
-  // TAHAP 3
-  // HomePage menerima callback dari parent.
-  // ============================================================
   final ValueChanged<bool> onFavoriteChanged;
 
   const HomePage({
@@ -405,22 +390,29 @@ class HomePage extends StatelessWidget {
 class CoursesPage extends StatelessWidget {
   final Map<String, dynamic> data;
 
-  // ============================================================
-  // TAHAP 3 - DATA DARI PARENT
-  // CoursesPage tidak memiliki state favorite sendiri.
-  // ============================================================
+  // TAHAP 3
   final bool isFavorite;
+  final ValueChanged<bool> onFavoriteChanged;
 
   // ============================================================
-  // TAHAP 3 - CALLBACK DARI PARENT
+  // TAHAP 4
+  // CoursesPage menerima ValueNotifier jumlah favorite.
   // ============================================================
-  final ValueChanged<bool> onFavoriteChanged;
+  final ValueNotifier<int> favoriteCount;
+
+  // ============================================================
+  // TAHAP 4
+  // Callback untuk mengubah nilai ValueNotifier.
+  // ============================================================
+  final VoidCallback onFavoriteCountChanged;
 
   const CoursesPage({
     super.key,
     required this.data,
     required this.isFavorite,
     required this.onFavoriteChanged,
+    required this.favoriteCount,
+    required this.onFavoriteCountChanged,
   });
 
   @override
@@ -446,6 +438,49 @@ class CoursesPage extends StatelessWidget {
                   ),
                 ),
               ),
+
+              // ==================================================
+              // TAHAP 4
+              // ValueListenableBuilder memantau perubahan
+              // pada favoriteCount.
+              // ==================================================
+              ValueListenableBuilder<int>(
+                valueListenable: favoriteCount,
+                builder: (context, value, child) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                    ),
+                    child: Row(
+                      mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Jumlah Favorite: $value',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        // =========================================
+                        // TAHAP 4
+                        // Button mengubah value ValueNotifier.
+                        // =========================================
+                        ElevatedButton(
+                          onPressed:
+                              onFavoriteCountChanged,
+                          child: const Text(
+                            'Tambah',
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 12),
+
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
@@ -461,16 +496,8 @@ class CoursesPage extends StatelessWidget {
                       child: CourseCard(
                         course: course,
 
-                        // ==================================================
                         // TAHAP 3
-                        // State diteruskan ke child.
-                        // ==================================================
                         isFavorite: isFavorite,
-
-                        // ==================================================
-                        // TAHAP 3
-                        // Callback diteruskan ke child.
-                        // ==================================================
                         onFavoriteChanged:
                             onFavoriteChanged,
                       ),
@@ -482,39 +509,74 @@ class CoursesPage extends StatelessWidget {
           );
         }
 
-        return GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate:
-              SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount:
-                columnsFor(constraints.maxWidth),
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.8,
-          ),
-          itemCount: courses.length,
-          itemBuilder: (context, index) {
-            final course =
-                courses[index]
-                    as Map<String, dynamic>;
+        return Column(
+          children: [
+            // ======================================================
+            // TAHAP 4
+            // ValueListenableBuilder pada layout medium/expanded.
+            // ======================================================
+            ValueListenableBuilder<int>(
+              valueListenable: favoriteCount,
+              builder: (context, value, child) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    16,
+                    16,
+                    16,
+                    0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment:
+                        MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Jumlah Favorite: $value',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed:
+                            onFavoriteCountChanged,
+                        child: const Text(
+                          'Tambah',
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
 
-            return CourseCard(
-              course: course,
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate:
+                    SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount:
+                      columnsFor(constraints.maxWidth),
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.8,
+                ),
+                itemCount: courses.length,
+                itemBuilder: (context, index) {
+                  final course =
+                      courses[index]
+                          as Map<String, dynamic>;
 
-              // ==================================================
-              // TAHAP 3
-              // State berasal dari parent.
-              // ==================================================
-              isFavorite: isFavorite,
+                  return CourseCard(
+                    course: course,
 
-              // ==================================================
-              // TAHAP 3
-              // Callback berasal dari parent.
-              // ==================================================
-              onFavoriteChanged:
-                  onFavoriteChanged,
-            );
-          },
+                    // TAHAP 3
+                    isFavorite: isFavorite,
+                    onFavoriteChanged:
+                        onFavoriteChanged,
+                  );
+                },
+              ),
+            ),
+          ],
         );
       },
     );
@@ -524,23 +586,8 @@ class CoursesPage extends StatelessWidget {
 class CourseCard extends StatelessWidget {
   final Map<String, dynamic> course;
 
-  // ============================================================
-  // TAHAP 3 - SINGLE SOURCE OF TRUTH
-  // ============================================================
-  // CourseCard TIDAK mempunyai:
-  //
-  // bool isFavorite = false;
-  //
-  // State favorite hanya dimiliki ResponsiveShell.
-  // CourseCard hanya menerima nilainya dari parent.
-  // ============================================================
+  // TAHAP 3
   final bool isFavorite;
-
-  // ============================================================
-  // TAHAP 3 - CALLBACK
-  // ============================================================
-  // CourseCard mengirim aksi perubahan kembali ke parent.
-  // ============================================================
   final ValueChanged<bool> onFavoriteChanged;
 
   const CourseCard({
@@ -598,13 +645,7 @@ class CourseCard extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: () {
-                      // ==================================================
                       // TAHAP 3
-                      // CourseCard tidak mengubah state sendiri.
-                      //
-                      // Child mengirim aksi ke parent melalui callback.
-                      // Parent kemudian mengubah isFavorite dengan setState.
-                      // ==================================================
                       onFavoriteChanged(!isFavorite);
                     },
                     icon: Icon(
