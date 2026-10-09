@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 
 import '../models/course.dart';
@@ -12,7 +11,28 @@ class CourseProvider extends ChangeNotifier {
   List<Course> courses = [];
   bool isLoading = false;
   String? error;
+
   final Set<String> favorites = {};
+
+  bool isFavorite(String code) {
+    return favorites.contains(code);
+  }
+
+  void toggleFavorite(String code) {
+    if (favorites.contains(code)) {
+      favorites.remove(code);
+    } else {
+      favorites.add(code);
+    }
+
+    notifyListeners();
+  }
+
+  List<Course> get favoriteCourses {
+    return courses
+        .where((course) => favorites.contains(course.code))
+        .toList();
+  }
 
   Future<void> loadCourses() async {
     isLoading = true;
@@ -28,14 +48,5 @@ class CourseProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  void toggleFavorite(String id) {
-    if (favorites.contains(id)) {
-      favorites.remove(id);
-    } else {
-      favorites.add(id);
-    }
-
-    notifyListeners();
-  }
 }
+

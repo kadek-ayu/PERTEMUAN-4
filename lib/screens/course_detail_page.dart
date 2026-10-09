@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../constants.dart';
 import '../models/course.dart';
+import '../providers/course_provider.dart';
 import '../widgets/student_header.dart';
 
 class CourseDetailPage extends StatelessWidget {
@@ -16,6 +18,8 @@ class CourseDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<CourseProvider>();
+    final isFavorite = provider.isFavorite(course.code);
     final student =
         studentData['student'] as Map<String, dynamic>;
 
@@ -49,6 +53,33 @@ class CourseDetailPage extends StatelessWidget {
                     Text('Jumlah SKS: ${course.credits}'),
                     const SizedBox(height: 8),
                     Text('Status: ${course.status}'),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Favorit',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: isFavorite
+                              ? 'Hapus dari favorit'
+                              : 'Tambahkan ke favorit',
+                          onPressed: () {
+                            provider.toggleFavorite(course.code);
+                          },
+                          icon: Icon(
+                            isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: isFavorite
+                                ? Colors.pink
+                                : Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
                     const Divider(height: 32),
                     const Text(
                       'Identitas Mahasiswa',
@@ -69,4 +100,3 @@ class CourseDetailPage extends StatelessWidget {
     );
   }
 }
-

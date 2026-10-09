@@ -4,9 +4,9 @@ import 'package:provider/provider.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
 import 'services/course_service.dart';
-
 import 'screens/home_page.dart';
 import 'screens/courses_page.dart';
+import 'screens/favorites_page.dart';
 import 'screens/profile_page.dart';
 
 void main() {
@@ -79,6 +79,10 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
       return CoursesPage(data: data);
     }
 
+    if (currentIndex == 2) {
+      return FavoritesPage(data: data);
+    }
+
     return ProfilePage(data: data);
   }
 
@@ -98,6 +102,10 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         NavigationDestination(
           icon: Icon(Icons.school),
           label: 'Courses',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.favorite),
+          label: 'Favorites',
         ),
         NavigationDestination(
           icon: Icon(Icons.person),
@@ -123,6 +131,10 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         NavigationRailDestination(
           icon: Icon(Icons.school),
           label: Text('Courses'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.favorite),
+          label: Text('Favorites'),
         ),
         NavigationRailDestination(
           icon: Icon(Icons.person),
@@ -199,3 +211,4 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     );
   }
 }
+

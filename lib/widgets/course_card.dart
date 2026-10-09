@@ -1,10 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/course.dart';
 import '../providers/course_provider.dart';
-
 import '../screens/course_detail_page.dart';
 
 class CourseCard extends StatelessWidget {
@@ -20,7 +18,7 @@ class CourseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CourseProvider>();
-    final isFavorite = provider.favorites.contains(course.code);
+    final isFavorite = provider.isFavorite(course.code);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -41,10 +39,10 @@ class CourseCard extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                course.status.toLowerCase() == 'selesai'
+                course.status.toLowerCase() == 'done'
                     ? Icons.check_circle
                     : Icons.menu_book,
-                color: course.status.toLowerCase() == 'selesai'
+                color: course.status.toLowerCase() == 'done'
                     ? Colors.green
                     : Colors.pink,
                 size: 30,
@@ -89,3 +87,4 @@ class CourseCard extends StatelessWidget {
     );
   }
 }
+
