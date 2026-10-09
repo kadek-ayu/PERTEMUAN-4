@@ -1,13 +1,37 @@
 
 import 'package:flutter/foundation.dart';
 
-// TAHAP 5: CHANGE NOTIFIER DAN NOTIFY LISTENERS
-// Class untuk mengelola state favorite course.
+import 'models/course.dart';
+import 'repositories/course_repository.dart';
+
+// TAHAP 5 - CHANGE NOTIFIER
+// TAHAP 10 - REPOSITORY PATTERN
 class CourseState extends ChangeNotifier {
-  // Menyimpan ID course yang ditandai sebagai favorite.
+  final CourseRepository repository;
+
+  CourseState(this.repository);
+
   final Set<String> favorites = {};
 
-  // Menambah atau menghapus course dari daftar favorite.
+  List<Course> courses = [];
+  bool isLoading = false;
+  String? errorMessage;
+
+  Future<void> loadCourses() async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      courses = await repository.getCourses();
+    } catch (error) {
+      errorMessage = error.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void toggleFavorite(String id) {
     if (favorites.contains(id)) {
       favorites.remove(id);
@@ -15,7 +39,6 @@ class CourseState extends ChangeNotifier {
       favorites.add(id);
     }
 
-    // Memberi tahu widget listener bahwa state berubah.
     notifyListeners();
   }
 }

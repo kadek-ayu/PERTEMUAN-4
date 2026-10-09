@@ -1,22 +1,39 @@
 
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 
 import 'course_state.dart';
 import 'models/course.dart';
+import 'repositories/course_repository.dart';
 import 'services/course_service.dart';
 
 const String studentName = 'Kadek Ayu Aulia';
 const String studentId = '2415051041';
 
+int columnsFor(double width) {
+  if (width < 600) return 1;
+  if (width < 840) return 2;
+  return 3;
+}
+
 // TAHAP 6 - PROVIDER
 // TAHAP 7 - watch(), read(), dan Consumer
 // TAHAP 8 - MODEL COURSE
 // TAHAP 9 - COURSE SERVICE
+// TAHAP 10 - REPOSITORY PATTERN
 void main() {
   runApp(
     ChangeNotifierProvider<CourseState>(
-      create: (_) => CourseState(),
+      create: (_) {
+        final state = CourseState(
+          CourseRepository(CourseService()),
+        );
+
+        state.loadCourses();
+
+        return state;
+      },
       child: const MyApp(),
     ),
   );
@@ -67,7 +84,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
   void initState() {
     super.initState();
 
-    // Data dibaca melalui CourseService, bukan dari UI.
+    // Memuat data mahasiswa melalui service.
     studentFuture = courseService.loadData();
   }
 
@@ -265,8 +282,10 @@ class HomePage extends StatelessWidget {
     final student =
         data['student'] as Map<String, dynamic>;
 
-    // Data course sudah berupa objek Course dari service.
-    final courses = data['courses'] as List<Course>;
+    // Data course diambil dari Provider,
+    // yang memuat data melalui Repository.
+    final courseState = context.watch<CourseState>();
+    final courses = courseState.courses;
 
     final completed = courses
         .where((course) => course.status == 'done')
@@ -349,16 +368,32 @@ class CoursesPage extends StatelessWidget {
     required this.data,
   });
 
-  int columnsFor(double width) {
-    if (width < 600) return 1;
-    if (width < 840) return 2;
-    return 3;
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Course sudah diparsing oleh CourseService.
-    final courses = data['courses'] as List<Course>;
+    // Daftar course berasal dari Provider.
+    final courseState = context.watch<CourseState>();
+    final courses = courseState.courses;
+
+    if (courseState.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: Colors.pink,
+        ),
+      );
+    }
+
+    if (courseState.errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            'Gagal memuat course:\n'
+            '${courseState.errorMessage}',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -385,10 +420,9 @@ class CoursesPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  // TAHAP 7 - context.watch()
                   Text(
                     'Jumlah Favorite: '
-                    '${context.watch<CourseState>().favorites.length}',
+                    '${courseState.favorites.length}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                     ),
@@ -416,8 +450,9 @@ class CoursesPage extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       gridDelegate:
                           SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount:
-                            columnsFor(constraints.maxWidth),
+                        crossAxisCount: columnsFor(
+                          constraints.maxWidth,
+                        ),
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 12,
                         childAspectRatio: 1.8,
@@ -486,16 +521,13 @@ class CourseCard extends StatelessWidget {
                       color: Colors.pink.shade700,
                     ),
                   ),
-                  // TAHAP 7 - Consumer
                   Consumer<CourseState>(
-                    builder: (context, courseState, child) {
-                      final isFavorite = courseState
-                          .favorites
-                          .contains(course.code);
+                    builder: (context, state, child) {
+                      final isFavorite =
+                          state.favorites.contains(course.code);
 
                       return IconButton(
                         onPressed: () {
-                          // context.read() untuk aksi.
                           context
                               .read<CourseState>()
                               .toggleFavorite(course.code);
