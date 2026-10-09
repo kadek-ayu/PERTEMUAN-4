@@ -1,7 +1,11 @@
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:provider/provider.dart';
+
+import 'course_state.dart';
 
 const String studentName = 'Kadek Ayu Aulia';
 const String studentId = '2415051041';
@@ -20,8 +24,14 @@ int columnsFor(double width) {
   return 3;
 }
 
+// TAHAP 6 - MEMASANG PROVIDER PADA WIDGET TREE
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider<CourseState>(
+      create: (_) => CourseState(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -59,14 +69,14 @@ class ResponsiveShell extends StatefulWidget {
 
 class _ResponsiveShellState extends State<ResponsiveShell> {
   late Future<Map<String, dynamic>> studentFuture;
+
   int currentIndex = 0;
 
   // TAHAP 3 - LIFTING STATE UP & SINGLE SOURCE OF TRUTH
-  
   bool isFavorite = false;
+
   // TAHAP 4 - VALUENOTIFIER
-  // ValueNotifier digunakan untuk menyimpan satu nilai sederhana.
-  // Pada tahap ini nilai yang digunakan adalah jumlah favorite.
+  // Menyimpan satu nilai sederhana berupa jumlah favorite.
   final ValueNotifier<int> favoriteCount = ValueNotifier<int>(0);
 
   @override
@@ -74,21 +84,20 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     super.initState();
     studentFuture = loadStudentData();
   }
+
   // TAHAP 3 - CALLBACK
   void changeFavorite(bool value) {
     setState(() {
       isFavorite = value;
     });
   }
+
   // TAHAP 4 - MENGUBAH VALUE
-  // ValueNotifier dapat diubah melalui property .value.
   void changeFavoriteCount() {
     favoriteCount.value++;
   }
 
-  Widget buildCurrentPage(
-    Map<String, dynamic> data,
-  ) {
+  Widget buildCurrentPage(Map<String, dynamic> data) {
     if (currentIndex == 0) {
       return HomePage(
         data: data,
@@ -103,16 +112,8 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         isFavorite: isFavorite,
         onFavoriteChanged: changeFavorite,
 
-        // ========================================================
-        // TAHAP 4
-        // ValueNotifier dikirim ke CoursesPage.
-        // ========================================================
+        // TAHAP 4 - VALUE NOTIFIER
         favoriteCount: favoriteCount,
-
-        // ========================================================
-        // TAHAP 4
-        // Callback untuk mengubah ValueNotifier.
-        // ========================================================
         onFavoriteCountChanged: changeFavoriteCount,
       );
     }
@@ -306,16 +307,11 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final student =
-        data['student'] as Map<String, dynamic>;
-
-    final courses =
-        data['courses'] as List<dynamic>;
+    final student = data['student'] as Map<String, dynamic>;
+    final courses = data['courses'] as List<dynamic>;
 
     final completed = courses
-        .where(
-          (course) => course['status'] == 'done',
-        )
+        .where((course) => course['status'] == 'done')
         .length;
 
     return SingleChildScrollView(
@@ -338,8 +334,7 @@ class HomePage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Column(
                     children: [
@@ -394,16 +389,8 @@ class CoursesPage extends StatelessWidget {
   final bool isFavorite;
   final ValueChanged<bool> onFavoriteChanged;
 
-  // ============================================================
-  // TAHAP 4
-  // CoursesPage menerima ValueNotifier jumlah favorite.
-  // ============================================================
+  // TAHAP 4 - VALUE NOTIFIER
   final ValueNotifier<int> favoriteCount;
-
-  // ============================================================
-  // TAHAP 4
-  // Callback untuk mengubah nilai ValueNotifier.
-  // ============================================================
   final VoidCallback onFavoriteCountChanged;
 
   const CoursesPage({
@@ -417,8 +404,7 @@ class CoursesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final courses =
-        data['courses'] as List<dynamic>;
+    final courses = data['courses'] as List<dynamic>;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -439,11 +425,7 @@ class CoursesPage extends StatelessWidget {
                 ),
               ),
 
-              // ==================================================
-              // TAHAP 4
-              // ValueListenableBuilder memantau perubahan
-              // pada favoriteCount.
-              // ==================================================
+              // TAHAP 4 - VALUE LISTENABLE BUILDER
               ValueListenableBuilder<int>(
                 valueListenable: favoriteCount,
                 builder: (context, value, child) {
@@ -452,8 +434,7 @@ class CoursesPage extends StatelessWidget {
                       horizontal: 16,
                     ),
                     child: Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           'Jumlah Favorite: $value',
@@ -461,17 +442,9 @@ class CoursesPage extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
-                        // =========================================
-                        // TAHAP 4
-                        // Button mengubah value ValueNotifier.
-                        // =========================================
                         ElevatedButton(
-                          onPressed:
-                              onFavoriteCountChanged,
-                          child: const Text(
-                            'Tambah',
-                          ),
+                          onPressed: onFavoriteCountChanged,
+                          child: const Text('Tambah'),
                         ),
                       ],
                     ),
@@ -480,26 +453,20 @@ class CoursesPage extends StatelessWidget {
               ),
 
               const SizedBox(height: 12),
-
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: courses.length,
                   itemBuilder: (context, index) {
                     final course =
-                        courses[index]
-                            as Map<String, dynamic>;
+                        courses[index] as Map<String, dynamic>;
 
                     return Padding(
-                      padding:
-                          const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.only(bottom: 12),
                       child: CourseCard(
                         course: course,
-
-                        // TAHAP 3
                         isFavorite: isFavorite,
-                        onFavoriteChanged:
-                            onFavoriteChanged,
+                        onFavoriteChanged: onFavoriteChanged,
                       ),
                     );
                   },
@@ -511,10 +478,7 @@ class CoursesPage extends StatelessWidget {
 
         return Column(
           children: [
-            // ======================================================
-            // TAHAP 4
-            // ValueListenableBuilder pada layout medium/expanded.
-            // ======================================================
+            // TAHAP 4 - VALUE LISTENABLE BUILDER
             ValueListenableBuilder<int>(
               valueListenable: favoriteCount,
               builder: (context, value, child) {
@@ -526,8 +490,7 @@ class CoursesPage extends StatelessWidget {
                     0,
                   ),
                   child: Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         'Jumlah Favorite: $value',
@@ -536,25 +499,20 @@ class CoursesPage extends StatelessWidget {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed:
-                            onFavoriteCountChanged,
-                        child: const Text(
-                          'Tambah',
-                        ),
+                        onPressed: onFavoriteCountChanged,
+                        child: const Text('Tambah'),
                       ),
                     ],
                   ),
                 );
               },
             ),
-
             Expanded(
               child: GridView.builder(
                 padding: const EdgeInsets.all(16),
                 gridDelegate:
                     SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount:
-                      columnsFor(constraints.maxWidth),
+                  crossAxisCount: columnsFor(constraints.maxWidth),
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                   childAspectRatio: 1.8,
@@ -562,16 +520,12 @@ class CoursesPage extends StatelessWidget {
                 itemCount: courses.length,
                 itemBuilder: (context, index) {
                   final course =
-                      courses[index]
-                          as Map<String, dynamic>;
+                      courses[index] as Map<String, dynamic>;
 
                   return CourseCard(
                     course: course,
-
-                    // TAHAP 3
                     isFavorite: isFavorite,
-                    onFavoriteChanged:
-                        onFavoriteChanged,
+                    onFavoriteChanged: onFavoriteChanged,
                   );
                 },
               ),
@@ -618,8 +572,7 @@ class CourseCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  CourseDetailPage(
+              builder: (context) => CourseDetailPage(
                 course: course,
               ),
             ),
@@ -628,16 +581,13 @@ class CourseCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
-            mainAxisAlignment:
-                MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   CircleAvatar(
-                    backgroundColor:
-                        Colors.pink.shade100,
+                    backgroundColor: Colors.pink.shade100,
                     child: Icon(
                       statusIcon,
                       color: Colors.pink.shade700,
@@ -652,9 +602,7 @@ class CourseCard extends StatelessWidget {
                       isFavorite
                           ? Icons.favorite
                           : Icons.favorite_border,
-                      color: isFavorite
-                          ? Colors.pink
-                          : Colors.grey,
+                      color: isFavorite ? Colors.pink : Colors.grey,
                     ),
                   ),
                 ],
@@ -669,8 +617,7 @@ class CourseCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '${course['code']} • '
-                '${course['credits']} SKS',
+                '${course['code']} • ${course['credits']} SKS',
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
@@ -712,8 +659,7 @@ class CourseDetailPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               course['title'] as String,
@@ -725,9 +671,7 @@ class CourseDetailPage extends StatelessWidget {
             const SizedBox(height: 16),
             Text('Code: ${course['code']}'),
             const SizedBox(height: 8),
-            Text(
-              'Credits: ${course['credits']} SKS',
-            ),
+            Text('Credits: ${course['credits']} SKS'),
             const SizedBox(height: 8),
             Text('Status: $status'),
             const SizedBox(height: 20),
@@ -750,26 +694,21 @@ class ProfilePage extends StatefulWidget {
   });
 
   @override
-  State<ProfilePage> createState() =>
-      _ProfilePageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState
-    extends State<ProfilePage> {
-  final formKey =
-      GlobalKey<FormState>();
+class _ProfilePageState extends State<ProfilePage> {
+  final formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     final student =
-        widget.data['student']
-            as Map<String, dynamic>;
+        widget.data['student'] as Map<String, dynamic>;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           StudentHeader(student: student),
           const SizedBox(height: 20),
@@ -792,8 +731,7 @@ class _ProfilePageState
               children: [
                 TextFormField(
                   initialValue: studentName,
-                  decoration:
-                      const InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Nama',
                     border: OutlineInputBorder(),
                   ),
@@ -801,8 +739,7 @@ class _ProfilePageState
                 const SizedBox(height: 16),
                 TextFormField(
                   initialValue: studentId,
-                  decoration:
-                      const InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'NIM',
                     border: OutlineInputBorder(),
                   ),
@@ -811,8 +748,7 @@ class _ProfilePageState
                 TextFormField(
                   minLines: 3,
                   maxLines: 5,
-                  decoration:
-                      const InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Komentar',
                     border: OutlineInputBorder(),
                   ),
@@ -830,11 +766,8 @@ class _ProfilePageState
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      if (formKey.currentState!
-                          .validate()) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(
+                      if (formKey.currentState!.validate()) {
+                        ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
                               'Feedback berhasil dikirim',
@@ -843,9 +776,7 @@ class _ProfilePageState
                         );
                       }
                     },
-                    child: const Text(
-                      'Kirim Feedback',
-                    ),
+                    child: const Text('Kirim Feedback'),
                   ),
                 ),
               ],
