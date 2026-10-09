@@ -1,33 +1,18 @@
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
 
 import 'course_state.dart';
 import 'models/course.dart';
+import 'services/course_service.dart';
 
 const String studentName = 'Kadek Ayu Aulia';
 const String studentId = '2415051041';
 
-Future<Map<String, dynamic>> loadStudentData() async {
-  final jsonString = await rootBundle.loadString(
-    'assets/data/student_data.json',
-  );
-
-  return jsonDecode(jsonString) as Map<String, dynamic>;
-}
-
-int columnsFor(double width) {
-  if (width < 600) return 1;
-  if (width < 840) return 2;
-  return 3;
-}
-
-// TAHAP 6 - PROVIDER PADA WIDGET TREE
-// TAHAP 7 - context.watch(), context.read(), dan Consumer
-// TAHAP 8 - MODEL COURSE DAN PARSING JSON
+// TAHAP 6 - PROVIDER
+// TAHAP 7 - watch(), read(), dan Consumer
+// TAHAP 8 - MODEL COURSE
+// TAHAP 9 - COURSE SERVICE
 void main() {
   runApp(
     ChangeNotifierProvider<CourseState>(
@@ -74,12 +59,16 @@ class ResponsiveShell extends StatefulWidget {
 class _ResponsiveShellState extends State<ResponsiveShell> {
   late Future<Map<String, dynamic>> studentFuture;
 
+  final CourseService courseService = CourseService();
+
   int currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    studentFuture = loadStudentData();
+
+    // Data dibaca melalui CourseService, bukan dari UI.
+    studentFuture = courseService.loadData();
   }
 
   Widget buildCurrentPage(Map<String, dynamic> data) {
@@ -276,14 +265,8 @@ class HomePage extends StatelessWidget {
     final student =
         data['student'] as Map<String, dynamic>;
 
-    // TAHAP 8 - Mengubah data JSON menjadi objek Course.
-    final courses = (data['courses'] as List<dynamic>)
-        .map(
-          (item) => Course.fromJson(
-            item as Map<String, dynamic>,
-          ),
-        )
-        .toList();
+    // Data course sudah berupa objek Course dari service.
+    final courses = data['courses'] as List<Course>;
 
     final completed = courses
         .where((course) => course.status == 'done')
@@ -366,16 +349,16 @@ class CoursesPage extends StatelessWidget {
     required this.data,
   });
 
+  int columnsFor(double width) {
+    if (width < 600) return 1;
+    if (width < 840) return 2;
+    return 3;
+  }
+
   @override
   Widget build(BuildContext context) {
-    // TAHAP 8 - Parsing JSON menjadi List<Course>.
-    final courses = (data['courses'] as List<dynamic>)
-        .map(
-          (item) => Course.fromJson(
-            item as Map<String, dynamic>,
-          ),
-        )
-        .toList();
+    // Course sudah diparsing oleh CourseService.
+    final courses = data['courses'] as List<Course>;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -433,9 +416,8 @@ class CoursesPage extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       gridDelegate:
                           SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: columnsFor(
-                          constraints.maxWidth,
-                        ),
+                        crossAxisCount:
+                            columnsFor(constraints.maxWidth),
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 12,
                         childAspectRatio: 1.8,
@@ -456,7 +438,6 @@ class CoursesPage extends StatelessWidget {
 }
 
 class CourseCard extends StatelessWidget {
-  // TAHAP 8 - CourseCard menerima objek Course.
   final Course course;
 
   const CourseCard({
@@ -505,7 +486,7 @@ class CourseCard extends StatelessWidget {
                       color: Colors.pink.shade700,
                     ),
                   ),
-                  // TAHAP 7 - Consumer membatasi area rebuild.
+                  // TAHAP 7 - Consumer
                   Consumer<CourseState>(
                     builder: (context, courseState, child) {
                       final isFavorite = courseState
@@ -513,8 +494,8 @@ class CourseCard extends StatelessWidget {
                           .contains(course.code);
 
                       return IconButton(
-                        // context.read() untuk menjalankan aksi.
                         onPressed: () {
+                          // context.read() untuk aksi.
                           context
                               .read<CourseState>()
                               .toggleFavorite(course.code);
@@ -566,7 +547,6 @@ class CourseCard extends StatelessWidget {
 }
 
 class CourseDetailPage extends StatelessWidget {
-  // TAHAP 8 - Detail menerima objek Course.
   final Course course;
 
   const CourseDetailPage({
