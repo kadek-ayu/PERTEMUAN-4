@@ -56,3 +56,33 @@ UI tidak membaca JSON secara langsung menggunakan `rootBundle` atau `jsonDecode`
 * Nama: Kadek Ayu Aulia
 * NIM: 2415051041
 * Kelas: PTI 4C
+
+Pengamatan REST Endpoint
+
+API latihan yang digunakan: JSONPlaceholder.
+
+Endpoint URL: https://jsonplaceholder.typicode.com/posts/1
+
+HTTP Method: GET
+
+Resource: Satu data post dengan ID 1
+
+Format Response: JSON
+
+Field JSON yang ditemukan
+
+userId: ID pengguna yang membuat post.
+
+id: ID post.
+
+title: Judul post.
+
+body: Isi post.
+
+Hasil Pengamatan
+
+Endpoint mengembalikan satu data post dalam format JSON. Data tersebut memiliki empat field, yaitu userId, id, title, dan body.
+
+API ini digunakan sebagai API latihan untuk memahami konsep endpoint, request GET, response, dan JSON. Data yang dikembalikan merupakan data post, bukan data mata kuliah (course).
+
+Catatan: Status code HTTP perlu diverifikasi melalui respons HTTP aktual, misalnya menggunakan Postman. JSON yang tampil di browser saja belum memastikan status code yang diterima.
