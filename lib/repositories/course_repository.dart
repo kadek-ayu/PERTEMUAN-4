@@ -1,29 +1,25 @@
 
 import '../models/course.dart';
-import '../services/course_api_service.dart';
+import '../services/course_data_source.dart';
 
 class CourseRepository {
-  final CourseApiService service;
+  final CourseDataSource dataSource;
 
-  CourseRepository(this.service);
+  CourseRepository(this.dataSource);
 
-  // Mengambil daftar course.
   Future<List<Course>> getCourses() {
-    return service.getCourses();
+    return dataSource.getCourses();
   }
 
-  // Membuat course baru.
   Future<Course> createCourse(Course course) {
-    return service.createCourse(course);
+    return dataSource.createCourse(course);
   }
 
-  // Memperbarui course yang sudah ada.
   Future<Course> updateCourse(int id, Course course) {
-    return service.updateCourse(id, course);
+    return dataSource.updateCourse(id, course);
   }
 
-  // Menghapus course berdasarkan ID.
   Future<void> deleteCourse(int id) {
-    return service.deleteCourse(id);
+    return dataSource.deleteCourse(id);
   }
 }

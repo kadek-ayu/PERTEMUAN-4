@@ -5,12 +5,14 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/course.dart';
+import 'course_data_source.dart';
 
-class CourseApiService {
-  CourseApiService(this.baseUrl);
-
+class CourseApiService implements CourseDataSource {
   final String baseUrl;
 
+  CourseApiService(this.baseUrl);
+
+  @override
   Future<List<Course>> getCourses() async {
     final uri = Uri.parse(baseUrl);
 
@@ -22,7 +24,8 @@ class CourseApiService {
 
     if (response.statusCode != 200) {
       throw Exception(
-        'Gagal mengambil course: HTTP ${response.statusCode}. '
+        'Gagal mengambil data course: '
+        'HTTP ${response.statusCode}. '
         'Respons: ${response.body}',
       );
     }
@@ -43,6 +46,7 @@ class CourseApiService {
     }).toList();
   }
 
+  @override
   Future<Course> createCourse(Course course) async {
     final uri = Uri.parse(baseUrl);
 
@@ -67,57 +71,61 @@ class CourseApiService {
     }
 
     throw Exception(
-      'Gagal membuat course: HTTP ${response.statusCode}. '
+      'Gagal menambahkan course: '
+      'HTTP ${response.statusCode}. '
       'Respons: ${response.body}',
     );
   }
-  
-Future<Course> updateCourse(int id, Course course) async {
-  final uri = Uri.parse('$baseUrl/$id');
 
-  debugPrint('PUT URL: $uri');
+  @override
+  Future<Course> updateCourse(int id, Course course) async {
+    final uri = Uri.parse('$baseUrl/$id');
 
-  final response = await http.put(
-    uri,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode(course.toJson()),
-  );
+    debugPrint('PUT URL: $uri');
 
-  debugPrint('PUT STATUS: ${response.statusCode}');
-  debugPrint('PUT RESPONSE: ${response.body}');
-
-  if (response.statusCode >= 200 &&
-      response.statusCode < 300) {
-    return Course.fromJson(
-      jsonDecode(response.body) as Map<String, dynamic>,
+    final response = await http.put(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(course.toJson()),
     );
-  }
 
-  throw Exception(
-    'Gagal memperbarui course: HTTP ${response.statusCode}. '
-    'Respons: ${response.body}',
-  );
-}
+    debugPrint('PUT STATUS: ${response.statusCode}');
+    debugPrint('PUT RESPONSE: ${response.body}');
 
-Future<void> deleteCourse(int id) async {
-  final uri = Uri.parse('$baseUrl/$id');
+    if (response.statusCode >= 200 &&
+        response.statusCode < 300) {
+      return Course.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+    }
 
-  debugPrint('DELETE URL: $uri');
-
-  final response = await http.delete(uri);
-
-  debugPrint('DELETE STATUS: ${response.statusCode}');
-  debugPrint('DELETE RESPONSE: ${response.body}');
-
-  if (response.statusCode < 200 ||
-      response.statusCode >= 300) {
     throw Exception(
-      'Gagal menghapus course: HTTP ${response.statusCode}. '
+      'Gagal memperbarui course: '
+      'HTTP ${response.statusCode}. '
       'Respons: ${response.body}',
     );
   }
-}
 
+  @override
+  Future<void> deleteCourse(int id) async {
+    final uri = Uri.parse('$baseUrl/$id');
+
+    debugPrint('DELETE URL: $uri');
+
+    final response = await http.delete(uri);
+
+    debugPrint('DELETE STATUS: ${response.statusCode}');
+    debugPrint('DELETE RESPONSE: ${response.body}');
+
+    if (response.statusCode < 200 ||
+        response.statusCode >= 300) {
+      throw Exception(
+        'Gagal menghapus course: '
+        'HTTP ${response.statusCode}. '
+        'Respons: ${response.body}',
+      );
+    }
+  }
 }
