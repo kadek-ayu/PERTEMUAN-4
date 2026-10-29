@@ -71,4 +71,34 @@ class CourseApiService {
       'Respons: ${response.body}',
     );
   }
+  
+Future<Course> updateCourse(int id, Course course) async {
+  final uri = Uri.parse('$baseUrl/$id');
+
+  debugPrint('PUT URL: $uri');
+
+  final response = await http.put(
+    uri,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode(course.toJson()),
+  );
+
+  debugPrint('PUT STATUS: ${response.statusCode}');
+  debugPrint('PUT RESPONSE: ${response.body}');
+
+  if (response.statusCode >= 200 &&
+      response.statusCode < 300) {
+    return Course.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
+  throw Exception(
+    'Gagal memperbarui course: HTTP ${response.statusCode}. '
+    'Respons: ${response.body}',
+  );
+}
+
 }

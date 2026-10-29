@@ -16,8 +16,8 @@ class CourseProvider extends ChangeNotifier {
 
   String? error;
 
-  // Error saat memuat ulang daftar setelah POST.
-  // Dipisahkan agar tidak dianggap sebagai kegagalan POST.
+  // Error saat memuat ulang daftar setelah POST atau PUT.
+  // Dipisahkan agar tidak dianggap sebagai kegagalan penyimpanan.
   String? refreshError;
 
   final Set<String> favorites = {};
@@ -75,8 +75,8 @@ class CourseProvider extends ChangeNotifier {
       // 1. Kirim course baru menggunakan HTTP POST.
       final createdCourse = await repository.createCourse(course);
 
-      // 2. Setelah POST berhasil, coba muat ulang daftar menggunakan GET.
-      // Jika GET gagal, jangan menganggap POST ikut gagal.
+      // 2. Coba muat ulang daftar menggunakan GET.
+      // Kegagalan GET tidak berarti POST gagal.
       try {
         final loadedCourses = await repository.getCourses();
         courses = loadedCourses;
@@ -84,10 +84,45 @@ class CourseProvider extends ChangeNotifier {
         refreshError = e.toString();
       }
 
-      // 3. Kembalikan hasil POST kepada halaman form.
+      // 3. Kembalikan hasil POST ke halaman form.
       return createdCourse;
     } catch (e) {
-      // Bagian ini menangani kegagalan saat POST.
+      error = e.toString();
+      rethrow;
+    } finally {
+      isSaving = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Course> updateCourse(int id, Course course) async {
+    if (isSaving) {
+      throw Exception('Penyimpanan course sedang berlangsung.');
+    }
+
+    isSaving = true;
+    error = null;
+    refreshError = null;
+
+    notifyListeners();
+
+    try {
+      // 1. Kirim perubahan menggunakan HTTP PUT.
+      final updatedCourse = await repository.updateCourse(id, course);
+
+      // 2. Coba muat ulang daftar menggunakan GET.
+      // Jika GET gagal, hasil PUT tetap dikembalikan.
+      try {
+        final loadedCourses = await repository.getCourses();
+        courses = loadedCourses;
+      } catch (e) {
+        refreshError = e.toString();
+      }
+
+      // 3. Kembalikan hasil PUT ke halaman form.
+      return updatedCourse;
+    } catch (e) {
+      // Menangani kegagalan permintaan PUT.
       error = e.toString();
       rethrow;
     } finally {

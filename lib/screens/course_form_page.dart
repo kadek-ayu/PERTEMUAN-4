@@ -6,7 +6,14 @@ import '../models/course.dart';
 import '../providers/course_provider.dart';
 
 class CourseFormPage extends StatefulWidget {
-  const CourseFormPage({super.key});
+  final Course? course;
+
+  const CourseFormPage({
+    super.key,
+    this.course,
+  });
+
+  bool get isEditing => course != null;
 
   @override
   State<CourseFormPage> createState() => _CourseFormPageState();
@@ -21,6 +28,21 @@ class _CourseFormPageState extends State<CourseFormPage> {
 
   String _status = 'planned';
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Isi form dengan data lama jika sedang mengedit.
+    final course = widget.course;
+
+    if (course != null) {
+      _codeController.text = course.code;
+      _titleController.text = course.title;
+      _creditsController.text = course.credits.toString();
+      _status = course.status;
+    }
+  }
 
   @override
   void dispose() {
@@ -38,11 +60,24 @@ class _CourseFormPageState extends State<CourseFormPage> {
     }
 
     final provider = context.read<CourseProvider>();
-
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
+    final existingCourse = widget.course;
+
+    // Saat edit, ID lama harus dipertahankan.
+    if (existingCourse != null && existingCourse.id == null) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Course tidak memiliki ID untuk diperbarui.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     final course = Course(
+      id: existingCourse?.id,
       code: _codeController.text.trim(),
       title: _titleController.text.trim(),
       credits: int.parse(_creditsController.text.trim()),
@@ -54,13 +89,24 @@ class _CourseFormPageState extends State<CourseFormPage> {
     });
 
     try {
-      await provider.createCourse(course);
+      if (widget.isEditing) {
+        await provider.updateCourse(
+          existingCourse!.id!,
+          course,
+        );
+      } else {
+        await provider.createCourse(course);
+      }
 
       if (!mounted) return;
 
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Course berhasil dibuat.'),
+        SnackBar(
+          content: Text(
+            widget.isEditing
+                ? 'Permintaan update course berhasil.'
+                : 'Course berhasil dibuat.',
+          ),
           backgroundColor: Colors.green,
         ),
       );
@@ -71,7 +117,10 @@ class _CourseFormPageState extends State<CourseFormPage> {
 
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Gagal membuat course: $e'),
+          content: Text(
+            '${widget.isEditing ? 'Gagal memperbarui' : 'Gagal membuat'} '
+            'course: $e',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -91,7 +140,9 @@ class _CourseFormPageState extends State<CourseFormPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Course'),
+        title: Text(
+          widget.isEditing ? 'Edit Course' : 'Tambah Course',
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -103,10 +154,14 @@ class _CourseFormPageState extends State<CourseFormPage> {
             children: [
               TextFormField(
                 controller: _codeController,
-                decoration: const InputDecoration(
+                readOnly: widget.isEditing,
+                decoration: InputDecoration(
                   labelText: 'Code',
                   hintText: 'Contoh: PTI101',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
+                  helperText: widget.isEditing
+                      ? 'Code tidak dapat diubah saat edit.'
+                      : null,
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -156,7 +211,7 @@ class _CourseFormPageState extends State<CourseFormPage> {
               const SizedBox(height: 16),
 
               DropdownButtonFormField<String>(
-  initialValue: _status,
+                initialValue: _status,
                 decoration: const InputDecoration(
                   labelText: 'Status',
                   border: OutlineInputBorder(),
@@ -200,7 +255,11 @@ class _CourseFormPageState extends State<CourseFormPage> {
                       )
                     : const Icon(Icons.save),
                 label: Text(
-                  isSaving ? 'Menyimpan...' : 'Simpan Course',
+                  isSaving
+                      ? 'Menyimpan...'
+                      : widget.isEditing
+                          ? 'Simpan Perubahan'
+                          : 'Simpan Course',
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pink,

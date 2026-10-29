@@ -106,9 +106,44 @@ class CoursesPage extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final course = provider.courses[index];
 
-                    return CourseCard(
-                      course: course,
-                      studentData: data,
+                    return Stack(
+                      children: [
+                        Positioned.fill(
+                          child: CourseCard(
+                            course: course,
+                            studentData: data,
+                          ),
+                        ),
+
+                        // Tombol edit pada setiap kartu course.
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: Material(
+                            color: Colors.white,
+                            shape: const CircleBorder(),
+                            elevation: 2,
+                            child: IconButton(
+                              tooltip: 'Edit ${course.code}',
+                              visualDensity: VisualDensity.compact,
+                              icon: const Icon(
+                                Icons.edit,
+                                color: Colors.pink,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => CourseFormPage(
+                                      course: course,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
                     );
                   },
                 ),
