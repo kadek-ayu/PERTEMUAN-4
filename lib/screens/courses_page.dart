@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/course_provider.dart';
 import '../widgets/course_card.dart';
+import '../widgets/error_view.dart';
 
 class CoursesPage extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -32,18 +33,15 @@ class CoursesPage extends StatelessWidget {
     }
 
     if (provider.error != null) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Terjadi error: ${provider.error}'),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: provider.loadCourses,
-              child: const Text('Coba Lagi'),
-            ),
-          ],
-        ),
+      return ErrorView(
+        message: 'Terjadi error: ${provider.error}',
+        onRetry: provider.loadCourses,
+      );
+    }
+
+    if (provider.courses.isEmpty) {
+      return const Center(
+        child: Text('Data course belum tersedia'),
       );
     }
 
@@ -77,29 +75,25 @@ class CoursesPage extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: provider.courses.isEmpty
-                  ? const Center(
-                      child: Text('Belum ada course'),
-                    )
-                  : GridView.builder(
-                      padding: const EdgeInsets.all(12),
-                      gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: columns,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        mainAxisExtent: 150,
-                      ),
-                      itemCount: provider.courses.length,
-                      itemBuilder: (context, index) {
-                        final course = provider.courses[index];
+              child: GridView.builder(
+                padding: const EdgeInsets.all(12),
+                gridDelegate:
+                    SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: columns,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  mainAxisExtent: 150,
+                ),
+                itemCount: provider.courses.length,
+                itemBuilder: (context, index) {
+                  final course = provider.courses[index];
 
-                        return CourseCard(
-                          course: course,
-                          studentData: data,
-                        );
-                      },
-                    ),
+                  return CourseCard(
+                    course: course,
+                    studentData: data,
+                  );
+                },
+              ),
             ),
           ],
         );

@@ -19,9 +19,9 @@ void main() {
         
 final provider = CourseProvider(
   CourseRepository(
-    CourseApiService(
-      'https://jsonplaceholder.typicode.com/posts',
-    ),
+  CourseApiService(
+  'https://jsonplaceholder.typicode.com/posts',
+),
   ),
 );
 
