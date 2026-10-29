@@ -1,8 +1,7 @@
+import 'services/course_supabase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-import 'services/course_api_service.dart';
 import 'services/course_data_source.dart';
 import 'services/course_service.dart';
 import 'providers/course_provider.dart';
@@ -18,11 +17,10 @@ const String supabaseUrl =
     'https://qscxrkgqvysjaliyupcf.supabase.co';
 
 const String supabaseAnonKey =
-    'TEMPEL_ANON_KEY_KAMU_DI_SINI';
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzY3hya2dxdnlzamFsaXl1cGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyODIxODcsImV4cCI6MjEwODg1ODE4N30.jHPZ6stosJ15tG-ff2BMuJSEql-EIk16SMMDzrRkmK8';
 
 // REST API yang masih digunakan pada Tahap 10.
-const String apiBaseUrl =
-    'https://jsonplaceholder.typicode.com/posts';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +31,7 @@ Future<void> main() async {
 );
 
   final CourseDataSource dataSource =
-      CourseApiService(apiBaseUrl);
+    CourseSupabaseService();
 
   final repository = CourseRepository(dataSource);
 
