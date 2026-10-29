@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/course.dart';
@@ -11,13 +12,23 @@ class CourseApiService {
   final String baseUrl;
 
   Future<List<Course>> getCourses() async {
-    final response = await http.get(Uri.parse(baseUrl));
+    final uri = Uri.parse(baseUrl);
+
+    debugPrint('GET URL: $uri');
+
+    final response = await http.get(uri);
+
+    debugPrint('GET STATUS: ${response.statusCode}');
 
     if (response.statusCode != 200) {
-      throw Exception('Gagal mengambil course: HTTP ${response.statusCode}');
+      throw Exception(
+        'Gagal mengambil course: HTTP ${response.statusCode}. '
+        'Respons: ${response.body}',
+      );
     }
 
-    final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
+    final List<dynamic> data =
+        jsonDecode(response.body) as List<dynamic>;
 
     return data.map((item) {
       final post = item as Map<String, dynamic>;
@@ -30,5 +41,34 @@ class CourseApiService {
         status: 'planned',
       );
     }).toList();
+  }
+
+  Future<Course> createCourse(Course course) async {
+    final uri = Uri.parse(baseUrl);
+
+    debugPrint('POST URL: $uri');
+
+    final response = await http.post(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(course.toJson()),
+    );
+
+    debugPrint('POST STATUS: ${response.statusCode}');
+    debugPrint('POST RESPONSE: ${response.body}');
+
+    if (response.statusCode == 200 ||
+        response.statusCode == 201) {
+      return Course.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+    }
+
+    throw Exception(
+      'Gagal membuat course: HTTP ${response.statusCode}. '
+      'Respons: ${response.body}',
+    );
   }
 }

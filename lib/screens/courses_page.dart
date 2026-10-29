@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../providers/course_provider.dart';
 import '../widgets/course_card.dart';
 import '../widgets/error_view.dart';
+import 'course_form_page.dart';
 
 class CoursesPage extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -39,12 +40,6 @@ class CoursesPage extends StatelessWidget {
       );
     }
 
-    if (provider.courses.isEmpty) {
-      return const Center(
-        child: Text('Data course belum tersedia'),
-      );
-    }
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final columns = columnsFor(constraints.maxWidth);
@@ -65,6 +60,21 @@ class CoursesPage extends StatelessWidget {
                       ),
                     ),
                   ),
+                  IconButton(
+                    tooltip: 'Tambah Course',
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const CourseFormPage(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.add_circle,
+                      color: Colors.pink,
+                      size: 30,
+                    ),
+                  ),
                   const Icon(
                     Icons.favorite,
                     color: Colors.pink,
@@ -74,27 +84,35 @@ class CoursesPage extends StatelessWidget {
                 ],
               ),
             ),
-            Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.all(12),
-                gridDelegate:
-                    SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: columns,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  mainAxisExtent: 150,
-                ),
-                itemCount: provider.courses.length,
-                itemBuilder: (context, index) {
-                  final course = provider.courses[index];
 
-                  return CourseCard(
-                    course: course,
-                    studentData: data,
-                  );
-                },
+            if (provider.courses.isEmpty)
+              const Expanded(
+                child: Center(
+                  child: Text('Data course belum tersedia'),
+                ),
+              )
+            else
+              Expanded(
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(12),
+                  gridDelegate:
+                      SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    mainAxisExtent: 150,
+                  ),
+                  itemCount: provider.courses.length,
+                  itemBuilder: (context, index) {
+                    final course = provider.courses[index];
+
+                    return CourseCard(
+                      course: course,
+                      studentData: data,
+                    );
+                  },
+                ),
               ),
-            ),
           ],
         );
       },

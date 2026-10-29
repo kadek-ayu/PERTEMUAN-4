@@ -1,8 +1,10 @@
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'services/course_api_service.dart';
 import 'services/course_service.dart';
 import 'http_get_test.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
 import 'screens/home_page.dart';
@@ -12,20 +14,21 @@ import 'screens/profile_page.dart';
 
 void main() {
   testFetchCourses();
- testCourseJson();
+  testCourseJson();
+
   runApp(
     ChangeNotifierProvider<CourseProvider>(
       create: (_) {
-        
-final provider = CourseProvider(
-  CourseRepository(
-  CourseApiService(
-  'https://jsonplaceholder.typicode.com/posts',
-),
-  ),
-);
+        final provider = CourseProvider(
+          CourseRepository(
+            CourseApiService(
+              'https://jsonplaceholder.typicode.com/posts',
+            ),
+          ),
+        );
 
         provider.loadCourses();
+
         return provider;
       },
       child: const MyApp(),
@@ -58,11 +61,12 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 // TAHAP 15 - KASUS B
-  // PENGUJIAN SEMENTARA:
-  // Context ini berada di atas ChangeNotifierProvider.
-  // Pemanggilan read di bawah ini seharusnya memicu
-  // ProviderNotFoundException saat aplikasi dijalankan.
+// PENGUJIAN SEMENTARA:
+// Context ini berada di atas ChangeNotifierProvider.
+// Pemanggilan read di bawah ini seharusnya memicu
+// ProviderNotFoundException saat aplikasi dijalankan.
 
 class ResponsiveShell extends StatefulWidget {
   const ResponsiveShell({super.key});
@@ -74,6 +78,7 @@ class ResponsiveShell extends StatefulWidget {
 
 class _ResponsiveShellState extends State<ResponsiveShell> {
   late Future<Map<String, dynamic>> studentFuture;
+
   final CourseService courseService = CourseService();
 
   int currentIndex = 0;
@@ -225,4 +230,3 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     );
   }
 }
-
