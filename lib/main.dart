@@ -1,10 +1,10 @@
+import 'services/course_api_service.dart';
+import 'services/course_service.dart';
 import 'http_get_test.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
-import 'services/course_service.dart';
 import 'screens/home_page.dart';
 import 'screens/courses_page.dart';
 import 'screens/favorites_page.dart';
@@ -12,13 +12,19 @@ import 'screens/profile_page.dart';
 
 void main() {
   testFetchCourses();
-
+ testCourseJson();
   runApp(
     ChangeNotifierProvider<CourseProvider>(
       create: (_) {
-        final provider = CourseProvider(
-          CourseRepository(CourseService()),
-        );
+        
+final provider = CourseProvider(
+  CourseRepository(
+    CourseApiService(
+      'https://jsonplaceholder.typicode.com/posts',
+    ),
+  ),
+);
+
         provider.loadCourses();
         return provider;
       },
