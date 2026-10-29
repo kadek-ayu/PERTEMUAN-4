@@ -1,3 +1,4 @@
+import 'http_get_test.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -10,6 +11,8 @@ import 'screens/favorites_page.dart';
 import 'screens/profile_page.dart';
 
 void main() {
+  testFetchCourses();
+
   runApp(
     ChangeNotifierProvider<CourseProvider>(
       create: (_) {
