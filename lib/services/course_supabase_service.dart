@@ -51,7 +51,12 @@ Future<Course> updateCourse(int id, Course course) async {
 }
 
 
-  @override
-  Future<void> deleteCourse(int id) =>
-      throw UnimplementedError();
+@override
+Future<void> deleteCourse(int id) async {
+  await supabase
+      .from('courses')
+      .delete()
+      .eq('id', id);
+}
+
 }
