@@ -19,10 +19,20 @@ class CourseSupabaseService implements CourseDataSource {
         .toList();
   }
 
-  // Implementasi CRUD lainnya dikerjakan pada tahap berikutnya.
+  
   @override
-  Future<Course> createCourse(Course course) =>
-      throw UnimplementedError();
+  Future<Course> createCourse(Course course) async {
+    final payload = course.toJson()
+      ..remove('id');
+
+    final row = await supabase
+        .from('courses')
+        .insert(payload)
+        .select()
+        .single();
+
+    return Course.fromJson(row);
+  }
 
   @override
   Future<Course> updateCourse(int id, Course course) =>
