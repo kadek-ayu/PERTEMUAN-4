@@ -21,6 +21,72 @@ class CoursesPage extends StatelessWidget {
     return 3;
   }
 
+  Future<void> _confirmDelete(
+    BuildContext context,
+    CourseProvider provider,
+    int id,
+    String code,
+    String title,
+  ) async {
+    // Tampilkan dialog konfirmasi terlebih dahulu.
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Hapus Course?'),
+          content: Text(
+            'Apakah kamu yakin ingin menghapus '
+            '"$title" ($code)?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
+              child: const Text('Hapus'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // Jangan lanjut jika pengguna membatalkan atau widget sudah tidak aktif.
+    if (!context.mounted || confirmed != true) return;
+
+    try {
+      await provider.deleteCourse(id);
+
+      // Periksa mounted setelah operasi asynchronous sebelum SnackBar.
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Course "$title" berhasil dihapus.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menghapus course: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CourseProvider>();
@@ -115,10 +181,10 @@ class CoursesPage extends StatelessWidget {
                           ),
                         ),
 
-                        // Tombol edit pada setiap kartu course.
+                        // Tombol Edit.
                         Positioned(
                           top: 4,
-                          right: 4,
+                          right: 44,
                           child: Material(
                             color: Colors.white,
                             shape: const CircleBorder(),
@@ -140,6 +206,53 @@ class CoursesPage extends StatelessWidget {
                                   ),
                                 );
                               },
+                            ),
+                          ),
+                        ),
+
+                        // Tombol Delete.
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: Material(
+                            color: Colors.white,
+                            shape: const CircleBorder(),
+                            elevation: 2,
+                            child: IconButton(
+                              tooltip: 'Hapus ${course.code}',
+                              visualDensity: VisualDensity.compact,
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.red,
+                                size: 20,
+                              ),
+                              onPressed: provider.isDeleting ||
+                                      provider.isSaving
+                                  ? null
+                                  : () {
+                                      final id = course.id;
+
+                                      if (id == null) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Course tidak memiliki ID.',
+                                            ),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                        return;
+                                      }
+
+                                      _confirmDelete(
+                                        context,
+                                        provider,
+                                        id,
+                                        course.code,
+                                        course.title,
+                                      );
+                                    },
                             ),
                           ),
                         ),

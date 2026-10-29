@@ -101,4 +101,23 @@ Future<Course> updateCourse(int id, Course course) async {
   );
 }
 
+Future<void> deleteCourse(int id) async {
+  final uri = Uri.parse('$baseUrl/$id');
+
+  debugPrint('DELETE URL: $uri');
+
+  final response = await http.delete(uri);
+
+  debugPrint('DELETE STATUS: ${response.statusCode}');
+  debugPrint('DELETE RESPONSE: ${response.body}');
+
+  if (response.statusCode < 200 ||
+      response.statusCode >= 300) {
+    throw Exception(
+      'Gagal menghapus course: HTTP ${response.statusCode}. '
+      'Respons: ${response.body}',
+    );
+  }
+}
+
 }

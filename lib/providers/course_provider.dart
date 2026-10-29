@@ -13,11 +13,9 @@ class CourseProvider extends ChangeNotifier {
 
   bool isLoading = false;
   bool isSaving = false;
+  bool isDeleting = false;
 
   String? error;
-
-  // Error saat memuat ulang daftar setelah POST atau PUT.
-  // Dipisahkan agar tidak dianggap sebagai kegagalan penyimpanan.
   String? refreshError;
 
   final Set<String> favorites = {};
@@ -61,8 +59,8 @@ class CourseProvider extends ChangeNotifier {
   }
 
   Future<Course> createCourse(Course course) async {
-    if (isSaving) {
-      throw Exception('Penyimpanan course sedang berlangsung.');
+    if (isSaving || isDeleting) {
+      throw Exception('Operasi course sedang berlangsung.');
     }
 
     isSaving = true;
@@ -72,11 +70,8 @@ class CourseProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. Kirim course baru menggunakan HTTP POST.
       final createdCourse = await repository.createCourse(course);
 
-      // 2. Coba muat ulang daftar menggunakan GET.
-      // Kegagalan GET tidak berarti POST gagal.
       try {
         final loadedCourses = await repository.getCourses();
         courses = loadedCourses;
@@ -84,7 +79,6 @@ class CourseProvider extends ChangeNotifier {
         refreshError = e.toString();
       }
 
-      // 3. Kembalikan hasil POST ke halaman form.
       return createdCourse;
     } catch (e) {
       error = e.toString();
@@ -96,8 +90,8 @@ class CourseProvider extends ChangeNotifier {
   }
 
   Future<Course> updateCourse(int id, Course course) async {
-    if (isSaving) {
-      throw Exception('Penyimpanan course sedang berlangsung.');
+    if (isSaving || isDeleting) {
+      throw Exception('Operasi course sedang berlangsung.');
     }
 
     isSaving = true;
@@ -107,11 +101,9 @@ class CourseProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. Kirim perubahan menggunakan HTTP PUT.
-      final updatedCourse = await repository.updateCourse(id, course);
+      final updatedCourse =
+          await repository.updateCourse(id, course);
 
-      // 2. Coba muat ulang daftar menggunakan GET.
-      // Jika GET gagal, hasil PUT tetap dikembalikan.
       try {
         final loadedCourses = await repository.getCourses();
         courses = loadedCourses;
@@ -119,14 +111,69 @@ class CourseProvider extends ChangeNotifier {
         refreshError = e.toString();
       }
 
-      // 3. Kembalikan hasil PUT ke halaman form.
       return updatedCourse;
     } catch (e) {
-      // Menangani kegagalan permintaan PUT.
       error = e.toString();
       rethrow;
     } finally {
       isSaving = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteCourse(int id) async {
+    if (isSaving || isDeleting) {
+      throw Exception('Operasi course sedang berlangsung.');
+    }
+
+    final courseIndex = courses.indexWhere(
+      (course) => course.id == id,
+    );
+
+    if (courseIndex == -1) {
+      throw Exception('Course tidak ditemukan.');
+    }
+
+    final course = courses[courseIndex];
+
+    isDeleting = true;
+    error = null;
+    refreshError = null;
+
+    notifyListeners();
+
+    try {
+      // 1. Kirim permintaan DELETE ke API.
+      await repository.deleteCourse(id);
+
+      // 2. Hapus course dari daftar lokal.
+      courses.removeWhere((item) => item.id == id);
+
+      // 3. Hapus juga favorite berdasarkan kode course.
+      favorites.remove(course.code);
+
+      // 4. Coba sinkronkan ulang daftar dari API.
+      // Kegagalan GET tidak membatalkan DELETE yang berhasil.
+      try {
+        final loadedCourses = await repository.getCourses();
+        courses = loadedCourses;
+
+        // Bersihkan favorite yang tidak lagi ada di daftar.
+        final validCodes = courses
+            .map((item) => item.code)
+            .toSet();
+
+        favorites.removeWhere(
+          (code) => !validCodes.contains(code),
+        );
+      } catch (e) {
+        refreshError = e.toString();
+      }
+    } catch (e) {
+      error = e.toString();
+      rethrow;
+    } finally {
+      isDeleting = false;
       notifyListeners();
     }
   }
