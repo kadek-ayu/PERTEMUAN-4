@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'services/course_api_service.dart';
 import 'services/course_data_source.dart';
@@ -12,9 +12,25 @@ import 'screens/courses_page.dart';
 import 'screens/favorites_page.dart';
 import 'screens/profile_page.dart';
 
-void main() {
-  const apiBaseUrl =
-      'https://jsonplaceholder.typicode.com/posts';
+// Konfigurasi Supabase untuk project praktikum.
+// Ganti placeholder dengan nilai dari dashboard Supabase.
+const String supabaseUrl =
+    'https://qscxrkgqvysjaliyupcf.supabase.co';
+
+const String supabaseAnonKey =
+    'TEMPEL_ANON_KEY_KAMU_DI_SINI';
+
+// REST API yang masih digunakan pada Tahap 10.
+const String apiBaseUrl =
+    'https://jsonplaceholder.typicode.com/posts';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+  url: supabaseUrl,
+  publishableKey: supabaseAnonKey,
+);
 
   final CourseDataSource dataSource =
       CourseApiService(apiBaseUrl);
