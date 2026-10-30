@@ -84,5 +84,3 @@ Hasil Pengamatan
 Endpoint mengembalikan satu data post dalam format JSON. Data tersebut memiliki empat field, yaitu userId, id, title, dan body.
 
 API ini digunakan sebagai API latihan untuk memahami konsep endpoint, request GET, response, dan JSON. Data yang dikembalikan merupakan data post, bukan data mata kuliah (course).
-
-Catatan: Status code HTTP perlu diverifikasi melalui respons HTTP aktual, misalnya menggunakan Postman. JSON yang tampil di browser saja belum memastikan status code yang diterima.
