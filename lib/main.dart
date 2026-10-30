@@ -19,6 +19,42 @@ const String supabaseUrl =
 const String supabaseAnonKey =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzY3hya2dxdnlzamFsaXl1cGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyODIxODcsImV4cCI6MjEwODg1ODE4N30.jHPZ6stosJ15tG-ff2BMuJSEql-EIk16SMMDzrRkmK8';
 
+// =====================================================
+// DOKUMENTASI PENGUJIAN STAGE 17
+// =====================================================
+
+// KASUS A – HTTP 404 ERROR
+// Kode sebelumnya saat melakukan pengujian:
+//
+// final CourseDataSource dataSource = CourseApiService(
+//   'https://jsonplaceholder.typicode.com/invalid-endpoint',
+// );
+//
+// Penyebab:
+// Endpoint yang digunakan tidak ditemukan (HTTP 404).
+//
+// Perbaikan:
+// Mengembalikan sumber data ke CourseSupabaseService().
+
+
+// KASUS C – JSON MAPPING ERROR
+// Kode sebelumnya saat melakukan pengujian:
+//
+// final CourseDataSource dataSource = CourseApiService(
+//   'https://jsonplaceholder.typicode.com/posts',
+// );
+//
+// Catatan:
+// Kesalahan pemetaan JSON dilakukan pada
+// course_api_service.dart menggunakan key title_wrong.
+//
+// Perbaikan:
+// Mengembalikan sumber data ke CourseSupabaseService().
+
+
+// =====================================================
+// KODE MAIN.DART NORMAL (SUDAH DIPERBAIKI)
+// =====================================================
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 

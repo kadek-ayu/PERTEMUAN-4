@@ -39,7 +39,12 @@ class CourseApiService implements CourseDataSource {
       return Course(
         id: post['id'] as int?,
         code: 'POST-${post['userId']}',
-        title: post['title'] as String? ?? '',
+
+        // KASUS C – JSON MAPPING ERROR
+        // Nama key sengaja dibuat salah.
+        // Kode ini menyebabkan kesalahan saat title dibaca.
+        title: post['title_wrong'] as String,
+
         credits: 0,
         status: 'planned',
       );
