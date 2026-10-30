@@ -1,9 +1,11 @@
-import 'services/course_supabase_service.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'constants.dart';
 import 'services/course_data_source.dart';
-import 'services/course_service.dart';
+import 'services/course_supabase_service.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
 import 'screens/home_page.dart';
@@ -11,28 +13,21 @@ import 'screens/courses_page.dart';
 import 'screens/favorites_page.dart';
 import 'screens/profile_page.dart';
 
-// Konfigurasi Supabase untuk project praktikum.
-// Ganti placeholder dengan nilai dari dashboard Supabase.
 const String supabaseUrl =
     'https://qscxrkgqvysjaliyupcf.supabase.co';
 
 const String supabaseAnonKey =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzY3hya2dxdnlzamFsaXl1cGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyODIxODcsImV4cCI6MjEwODg1ODE4N30.jHPZ6stosJ15tG-ff2BMuJSEql-EIk16SMMDzrRkmK8';
 
-// REST API yang masih digunakan pada Tahap 10.
-
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Supabase.initialize(
-  url: supabaseUrl,
-  publishableKey: supabaseAnonKey,
-);
+    url: supabaseUrl,
+    publishableKey: supabaseAnonKey,
+  );
 
-  final CourseDataSource dataSource =
-    CourseSupabaseService();
-
+  final CourseDataSource dataSource = CourseSupabaseService();
   final repository = CourseRepository(dataSource);
 
   runApp(
@@ -73,37 +68,33 @@ class ResponsiveShell extends StatefulWidget {
   const ResponsiveShell({super.key});
 
   @override
-  State<ResponsiveShell> createState() =>
-      _ResponsiveShellState();
+  State<ResponsiveShell> createState() => _ResponsiveShellState();
 }
 
 class _ResponsiveShellState extends State<ResponsiveShell> {
-  late Future<Map<String, dynamic>> studentFuture;
-
-  final CourseService courseService = CourseService();
-
   int currentIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    studentFuture = courseService.loadData();
-  }
+  final Map<String, dynamic> studentData = {
+    'student': {
+      'name': studentName,
+      'nim': studentId,
+    },
+  };
 
-  Widget buildCurrentPage(Map<String, dynamic> data) {
+  Widget buildCurrentPage() {
     if (currentIndex == 0) {
-      return HomePage(data: data);
+      return HomePage(data: studentData);
     }
 
     if (currentIndex == 1) {
-      return CoursesPage(data: data);
+      return CoursesPage(data: studentData);
     }
 
     if (currentIndex == 2) {
-      return FavoritesPage(data: data);
+      return FavoritesPage(data: studentData);
     }
 
-    return ProfilePage(data: data);
+    return ProfilePage(data: studentData);
   }
 
   NavigationBar buildNavigationBar() {
@@ -171,51 +162,20 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
         title: const Text('Course Explorer'),
         centerTitle: true,
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: studentFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState ==
-              ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: Colors.pink,
-              ),
-            );
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final page = buildCurrentPage();
+
+          if (constraints.maxWidth < 840) {
+            return page;
           }
 
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                'Terjadi error:\n${snapshot.error}',
-                textAlign: TextAlign.center,
-              ),
-            );
-          }
-
-          if (!snapshot.hasData) {
-            return const Center(
-              child: Text('Data tidak tersedia'),
-            );
-          }
-
-          final data = snapshot.data!;
-
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final page = buildCurrentPage(data);
-
-              if (constraints.maxWidth < 840) {
-                return page;
-              }
-
-              return Row(
-                children: [
-                  buildNavigationRail(),
-                  const VerticalDivider(width: 1),
-                  Expanded(child: page),
-                ],
-              );
-            },
+          return Row(
+            children: [
+              buildNavigationRail(),
+              const VerticalDivider(width: 1),
+              Expanded(child: page),
+            ],
           );
         },
       ),

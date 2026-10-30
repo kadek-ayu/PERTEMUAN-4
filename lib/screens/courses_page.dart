@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../constants.dart';
 import '../providers/course_provider.dart';
 import '../widgets/course_card.dart';
 import '../widgets/error_view.dart';
@@ -28,7 +29,6 @@ class CoursesPage extends StatelessWidget {
     String code,
     String title,
   ) async {
-    // Tampilkan dialog konfirmasi terlebih dahulu.
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
@@ -60,13 +60,11 @@ class CoursesPage extends StatelessWidget {
       },
     );
 
-    // Jangan lanjut jika pengguna membatalkan atau widget sudah tidak aktif.
     if (!context.mounted || confirmed != true) return;
 
     try {
       await provider.deleteCourse(id);
 
-      // Periksa mounted setelah operasi asynchronous sebelum SnackBar.
       if (!context.mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -91,75 +89,118 @@ class CoursesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<CourseProvider>();
 
-    if (provider.isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(
-          color: Colors.pink,
-        ),
-      );
-    }
-
-    if (provider.error != null) {
-      return ErrorView(
-        message: 'Terjadi error: ${provider.error}',
-        onRetry: provider.loadCourses,
-      );
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = columnsFor(constraints.maxWidth);
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'Daftar Course',
-                      style: TextStyle(
-                        fontSize: 20,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Identitas mahasiswa
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      studentName,
+                      style: const TextStyle(
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  IconButton(
-                    tooltip: 'Tambah Course',
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const CourseFormPage(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(
-                      Icons.add_circle,
-                      color: Colors.pink,
-                      size: 30,
+                    const SizedBox(height: 4),
+                    Text(
+                      'NIM: $studentId',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.pink.shade700,
+                      ),
                     ),
+                  ],
+                ),
+              ),
+              const Text(
+                'ฅ^•ﻌ•^ฅ',
+                style: TextStyle(
+                  fontSize: 27,
+                  color: Colors.pink,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const Divider(height: 1),
+
+        // Judul daftar course
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Daftar Course',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const Icon(
-                    Icons.favorite,
-                    color: Colors.pink,
-                  ),
-                  const SizedBox(width: 4),
-                  Text('${provider.favorites.length}'),
-                ],
+                ),
+              ),
+              IconButton(
+                tooltip: 'Tambah Course',
+                onPressed: provider.isSaving || provider.isDeleting
+                    ? null
+                    : () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const CourseFormPage(),
+                          ),
+                        );
+                      },
+                icon: const Icon(
+                  Icons.add_circle,
+                  color: Colors.pink,
+                  size: 30,
+                ),
+              ),
+              const Icon(
+                Icons.favorite,
+                color: Colors.pink,
+              ),
+              const SizedBox(width: 4),
+              Text('${provider.favorites.length}'),
+            ],
+          ),
+        ),
+
+        if (provider.isLoading)
+          const Expanded(
+            child: Center(
+              child: CircularProgressIndicator(
+                color: Colors.pink,
               ),
             ),
+          )
+        else if (provider.error != null)
+          Expanded(
+            child: ErrorView(
+              message: 'Terjadi error: ${provider.error}',
+              onRetry: provider.loadCourses,
+            ),
+          )
+        else if (provider.courses.isEmpty)
+          const Expanded(
+            child: Center(
+              child: Text('Data course belum tersedia'),
+            ),
+          )
+        else
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final columns = columnsFor(constraints.maxWidth);
 
-            if (provider.courses.isEmpty)
-              const Expanded(
-                child: Center(
-                  child: Text('Data course belum tersedia'),
-                ),
-              )
-            else
-              Expanded(
-                child: GridView.builder(
+                return GridView.builder(
                   padding: const EdgeInsets.all(12),
                   gridDelegate:
                       SliverGridDelegateWithFixedCrossAxisCount(
@@ -180,8 +221,6 @@ class CoursesPage extends StatelessWidget {
                             studentData: data,
                           ),
                         ),
-
-                        // Tombol Edit.
                         Positioned(
                           top: 4,
                           right: 44,
@@ -197,20 +236,21 @@ class CoursesPage extends StatelessWidget {
                                 color: Colors.pink,
                                 size: 20,
                               ),
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => CourseFormPage(
-                                      course: course,
-                                    ),
-                                  ),
-                                );
-                              },
+                              onPressed: provider.isSaving ||
+                                      provider.isDeleting
+                                  ? null
+                                  : () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => CourseFormPage(
+                                            course: course,
+                                          ),
+                                        ),
+                                      );
+                                    },
                             ),
                           ),
                         ),
-
-                        // Tombol Delete.
                         Positioned(
                           top: 4,
                           right: 4,
@@ -259,11 +299,11 @@ class CoursesPage extends StatelessWidget {
                       ],
                     );
                   },
-                ),
-              ),
-          ],
-        );
-      },
+                );
+              },
+            ),
+          ),
+      ],
     );
   }
 }
