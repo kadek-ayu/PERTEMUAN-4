@@ -8,6 +8,7 @@ import 'services/course_data_source.dart';
 import 'services/course_supabase_service.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
+import 'screens/auth_page.dart';
 import 'screens/home_page.dart';
 import 'screens/courses_page.dart';
 import 'screens/favorites_page.dart';
@@ -16,45 +17,11 @@ import 'screens/profile_page.dart';
 const String supabaseUrl =
     'https://qscxrkgqvysjaliyupcf.supabase.co';
 
-const String supabaseAnonKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzY3hya2dxdnlzamFsaXl1cGNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyODIxODcsImV4cCI6MjEwODg1ODE4N30.jHPZ6stosJ15tG-ff2BMuJSEql-EIk16SMMDzrRkmK8';
+// Gunakan kembali publishable/anon key yang sudah ada
+// pada main.dart milikmu sebelumnya.
+// Jangan menggantinya dengan service_role key.
+const String supabaseAnonKey = 'sb_publishable_aB6BsNU3QhvOkVqq2rMTew_9TpElf8A';
 
-// =====================================================
-// DOKUMENTASI PENGUJIAN STAGE 17
-// =====================================================
-
-// KASUS A – HTTP 404 ERROR
-// Kode sebelumnya saat melakukan pengujian:
-//
-// final CourseDataSource dataSource = CourseApiService(
-//   'https://jsonplaceholder.typicode.com/invalid-endpoint',
-// );
-//
-// Penyebab:
-// Endpoint yang digunakan tidak ditemukan (HTTP 404).
-//
-// Perbaikan:
-// Mengembalikan sumber data ke CourseSupabaseService().
-
-
-// KASUS C – JSON MAPPING ERROR
-// Kode sebelumnya saat melakukan pengujian:
-//
-// final CourseDataSource dataSource = CourseApiService(
-//   'https://jsonplaceholder.typicode.com/posts',
-// );
-//
-// Catatan:
-// Kesalahan pemetaan JSON dilakukan pada
-// course_api_service.dart menggunakan key title_wrong.
-//
-// Perbaikan:
-// Mengembalikan sumber data ke CourseSupabaseService().
-
-
-// =====================================================
-// KODE MAIN.DART NORMAL (SUDAH DIPERBAIKI)
-// =====================================================
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -95,7 +62,9 @@ class MyApp extends StatelessWidget {
           elevation: 3,
         ),
       ),
-      home: const ResponsiveShell(),
+      home: const AuthGate(
+        child: ResponsiveShell(),
+      ),
     );
   }
 }
@@ -131,6 +100,46 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     }
 
     return ProfilePage(data: studentData);
+  }
+
+  Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text(
+          'Apakah kamu yakin ingin keluar dari akun?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext, false);
+            },
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext, true);
+            },
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await Supabase.instance.client.auth.signOut();
+      } catch (e) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal logout: $e'),
+          ),
+        );
+      }
+    }
   }
 
   NavigationBar buildNavigationBar() {
@@ -197,6 +206,13 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
       appBar: AppBar(
         title: const Text('Course Explorer'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            tooltip: 'Logout',
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
+          ),
+        ],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
