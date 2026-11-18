@@ -199,7 +199,13 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
       ],
     );
   }
+// ==========================================
+// PRAKTIK 2: AUTHENTICATION SESSION & LOGOUT
+// ==========================================
 
+// Memeriksa session pengguna ketika aplikasi pertama kali dibuka.
+// Jika session masih aktif, pengguna diarahkan ke halaman utama.
+// Jika session tidak tersedia, pengguna diarahkan ke halaman login.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
