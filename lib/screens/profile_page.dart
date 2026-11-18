@@ -1,7 +1,9 @@
+
 import 'package:flutter/material.dart';
 
 import '../constants.dart';
 import '../widgets/student_header.dart';
+import '../services/profile_service.dart';
 
 class ProfilePage extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -11,8 +13,6 @@ class ProfilePage extends StatefulWidget {
     required this.data,
   });
 
-  // TAHAP 15 - KASUS D
-  // Pastikan widget masih aktif sebelum setState.
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
@@ -24,12 +24,17 @@ class _ProfilePageState extends State<ProfilePage> {
   final _nimController = TextEditingController();
   final _commentController = TextEditingController();
 
+  final ProfileService _profileService = ProfileService();
+  late Future<UserProfile?> _profileFuture;
+
   @override
   void initState() {
     super.initState();
 
     _nameController.text = studentName;
     _nimController.text = studentId;
+
+    _profileFuture = _profileService.getMyProfile();
   }
 
   @override
@@ -55,6 +60,61 @@ class _ProfilePageState extends State<ProfilePage> {
     _commentController.clear();
   }
 
+  Widget _buildAccountProfile() {
+    return FutureBuilder<UserProfile?>(
+      future: _profileFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Gagal mengambil profil: ${snapshot.error}',
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
+          );
+        }
+
+        final profile = snapshot.data;
+
+        if (profile == null) {
+          return const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Data profil belum ditemukan.'),
+            ),
+          );
+        }
+
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Nama: ${profile.name}'),
+                const SizedBox(height: 8),
+                Text('Email: ${profile.email}'),
+                const SizedBox(height: 8),
+                Text('Role: ${profile.role.toUpperCase()}'),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final student = widget.data['student'] as Map<String, dynamic>;
@@ -65,7 +125,23 @@ class _ProfilePageState extends State<ProfilePage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           StudentHeader(student: student),
+
           const SizedBox(height: 16),
+
+          const Text(
+            'Profil Akun Pengguna',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          _buildAccountProfile(),
+
+          const SizedBox(height: 24),
+
           const Text(
             'Profil Mahasiswa',
             style: TextStyle(
@@ -73,10 +149,14 @@ class _ProfilePageState extends State<ProfilePage> {
               fontWeight: FontWeight.bold,
             ),
           ),
+
           const SizedBox(height: 8),
+
           Text('Nama: $studentName'),
           Text('NIM: $studentId'),
+
           const SizedBox(height: 24),
+
           const Text(
             'Formulir Feedback',
             style: TextStyle(
@@ -84,7 +164,9 @@ class _ProfilePageState extends State<ProfilePage> {
               fontWeight: FontWeight.bold,
             ),
           ),
+
           const SizedBox(height: 12),
+
           Form(
             key: _formKey,
             child: Column(
@@ -102,7 +184,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     return null;
                   },
                 ),
+
                 const SizedBox(height: 12),
+
                 TextFormField(
                   controller: _nimController,
                   decoration: const InputDecoration(
@@ -116,7 +200,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     return null;
                   },
                 ),
+
                 const SizedBox(height: 12),
+
                 TextFormField(
                   controller: _commentController,
                   maxLines: 3,
@@ -132,7 +218,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     return null;
                   },
                 ),
+
                 const SizedBox(height: 16),
+
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -148,4 +236,3 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 }
-

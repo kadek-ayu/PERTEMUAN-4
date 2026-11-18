@@ -1,0 +1,2488 @@
+﻿===== SOURCE CODE WS 9 =====
+
+
+===== FILE: pubspec.yaml =====
+name: flutter_ui_fundamentals
+description: "A new Flutter project."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# In Windows, build-name is used as the major, minor, and patch parts
+# of the product and file versions while build-number is used as the build suffix.
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.2
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.5+1
+  http: ^1.6.0
+  supabase_flutter: ^2.18.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^6.0.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+  
+  assets:
+    - assets/profile.jpeg
+    - assets/data/
+  # To add assets to your application, add an assets section, like this:
+  # assets:
+  #   - images/a_dot_burr.jpeg
+  #   - images/a_dot_ham.jpeg
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package
+
+
+
+===== FILE: lib/main.dart =====
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'constants.dart';
+import 'services/course_data_source.dart';
+import 'services/course_supabase_service.dart';
+import 'providers/course_provider.dart';
+import 'repositories/course_repository.dart';
+import 'screens/auth_page.dart';
+import 'screens/home_page.dart';
+import 'screens/courses_page.dart';
+import 'screens/favorites_page.dart';
+import 'screens/profile_page.dart';
+
+const String supabaseUrl =
+    'https://qscxrkgqvysjaliyupcf.supabase.co';
+
+// Gunakan kembali publishable/anon key yang sudah ada
+// pada main.dart milikmu sebelumnya.
+// Jangan menggantinya dengan service_role key.
+const String supabaseAnonKey = 'sb_publishable_aB6BsNU3QhvOkVqq2rMTew_9TpElf8A';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: supabaseUrl,
+    publishableKey: supabaseAnonKey,
+  );
+
+  final CourseDataSource dataSource = CourseSupabaseService();
+  final repository = CourseRepository(dataSource);
+
+  runApp(
+    ChangeNotifierProvider<CourseProvider>(
+      create: (_) => CourseProvider(repository)..loadCourses(),
+      child: const MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Course Explorer',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.pink,
+        ),
+        scaffoldBackgroundColor: Colors.pink.shade50,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.pink,
+          foregroundColor: Colors.white,
+        ),
+        cardTheme: const CardThemeData(
+          elevation: 3,
+        ),
+      ),
+      home: const AuthGate(
+        child: ResponsiveShell(),
+      ),
+    );
+  }
+}
+
+class ResponsiveShell extends StatefulWidget {
+  const ResponsiveShell({super.key});
+
+  @override
+  State<ResponsiveShell> createState() => _ResponsiveShellState();
+}
+
+class _ResponsiveShellState extends State<ResponsiveShell> {
+  int currentIndex = 0;
+
+  final Map<String, dynamic> studentData = {
+    'student': {
+      'name': studentName,
+      'nim': studentId,
+    },
+  };
+
+  Widget buildCurrentPage() {
+    if (currentIndex == 0) {
+      return HomePage(data: studentData);
+    }
+
+    if (currentIndex == 1) {
+      return CoursesPage(data: studentData);
+    }
+
+    if (currentIndex == 2) {
+      return FavoritesPage(data: studentData);
+    }
+
+    return ProfilePage(data: studentData);
+  }
+
+  Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text(
+          'Apakah kamu yakin ingin keluar dari akun?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext, false);
+            },
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext, true);
+            },
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await Supabase.instance.client.auth.signOut();
+      } catch (e) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal logout: $e'),
+          ),
+        );
+      }
+    }
+  }
+
+  NavigationBar buildNavigationBar() {
+    return NavigationBar(
+      selectedIndex: currentIndex,
+      onDestinationSelected: (index) {
+        setState(() {
+          currentIndex = index;
+        });
+      },
+      destinations: const [
+        NavigationDestination(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.school),
+          label: 'Courses',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.favorite),
+          label: 'Favorites',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ],
+    );
+  }
+
+  NavigationRail buildNavigationRail() {
+    return NavigationRail(
+      selectedIndex: currentIndex,
+      onDestinationSelected: (index) {
+        setState(() {
+          currentIndex = index;
+        });
+      },
+      destinations: const [
+        NavigationRailDestination(
+          icon: Icon(Icons.home),
+          label: Text('Home'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.school),
+          label: Text('Courses'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.favorite),
+          label: Text('Favorites'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.person),
+          label: Text('Profile'),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Course Explorer'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            tooltip: 'Logout',
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
+          ),
+        ],
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final page = buildCurrentPage();
+
+          if (constraints.maxWidth < 840) {
+            return page;
+          }
+
+          return Row(
+            children: [
+              buildNavigationRail(),
+              const VerticalDivider(width: 1),
+              Expanded(child: page),
+            ],
+          );
+        },
+      ),
+      bottomNavigationBar: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 840) {
+            return buildNavigationBar();
+          }
+
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+  }
+}
+
+
+
+===== FILE: lib/screens/auth_page.dart =====
+
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class AuthGate extends StatelessWidget {
+  final Widget child;
+
+  const AuthGate({
+    super.key,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final client = Supabase.instance.client;
+
+    return StreamBuilder<AuthState>(
+      stream: client.auth.onAuthStateChange,
+      builder: (context, snapshot) {
+        final session = snapshot.hasData
+            ? snapshot.data!.session
+            : client.auth.currentSession;
+
+        if (session == null) {
+          return const AuthPage();
+        }
+
+        return child;
+      },
+    );
+  }
+}
+
+class AuthPage extends StatefulWidget {
+  const AuthPage({super.key});
+
+  @override
+  State<AuthPage> createState() => _AuthPageState();
+}
+
+class _AuthPageState extends State<AuthPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  bool _isRegister = false;
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final auth = Supabase.instance.client.auth;
+
+      if (_isRegister) {
+        final response = await auth.signUp(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          data: {
+            'full_name': _nameController.text.trim(),
+          },
+        );
+
+        if (!mounted) return;
+
+        if (response.session == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Registrasi berhasil. Silakan periksa email untuk konfirmasi akun.',
+              ),
+            ),
+          );
+        }
+      } else {
+        await auth.signInWithPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+      }
+    } on AuthException catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password wajib diisi';
+    }
+
+    if (value.length < 6) {
+      return 'Password minimal 6 karakter';
+    }
+
+    if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d).+$').hasMatch(value)) {
+      return 'Password harus mengandung huruf dan angka';
+    }
+
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Card(
+              elevation: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.school,
+                        size: 64,
+                        color: Colors.pink,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Course Explorer',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _isRegister
+                            ? 'Buat akun baru'
+                            : 'Silakan login ke akun Anda',
+                      ),
+                      const SizedBox(height: 24),
+
+                      if (_isRegister) ...[
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Nama Lengkap',
+                            prefixIcon: Icon(Icons.person),
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Nama wajib diisi';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: Icon(Icons.email),
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Email wajib diisi';
+                          }
+
+                          if (!RegExp(
+                            r'^[^@]+@[^@]+\.[^@]+$',
+                          ).hasMatch(value.trim())) {
+                            return 'Format email tidak valid';
+                          }
+
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: const Icon(Icons.lock),
+                          border: const OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                        ),
+                        validator: _validatePassword,
+                      ),
+                      const SizedBox(height: 24),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _submit,
+                          child: _isLoading
+                              ? const CircularProgressIndicator()
+                              : Text(
+                                  _isRegister ? 'Register' : 'Login',
+                                ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      TextButton(
+                        onPressed: _isLoading
+                            ? null
+                            : () {
+                                setState(() {
+                                  _isRegister = !_isRegister;
+                                  _formKey.currentState?.reset();
+                                });
+                              },
+                        child: Text(
+                          _isRegister
+                              ? 'Sudah punya akun? Login'
+                              : 'Belum punya akun? Register',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\services\course_api_service.dart =====
+
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+
+import '../models/course.dart';
+import 'course_data_source.dart';
+
+class CourseApiService implements CourseDataSource {
+  final String baseUrl;
+
+  CourseApiService(this.baseUrl);
+
+  @override
+  Future<List<Course>> getCourses() async {
+    final uri = Uri.parse(baseUrl);
+
+    debugPrint('GET URL: $uri');
+
+    final response = await http.get(uri);
+
+    debugPrint('GET STATUS: ${response.statusCode}');
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Gagal mengambil data course: '
+        'HTTP ${response.statusCode}. '
+        'Respons: ${response.body}',
+      );
+    }
+
+    final List<dynamic> data =
+        jsonDecode(response.body) as List<dynamic>;
+
+    return data.map((item) {
+      final post = item as Map<String, dynamic>;
+
+      return Course(
+        id: post['id'] as int?,
+        code: 'POST-${post['userId']}',
+
+        // KASUS C â€“ JSON MAPPING ERROR
+        // Nama key sengaja dibuat salah.
+        // Kode ini menyebabkan kesalahan saat title dibaca.
+        title: post['title_wrong'] as String,
+
+        credits: 0,
+        status: 'planned',
+      );
+    }).toList();
+  }
+
+  @override
+  Future<Course> createCourse(Course course) async {
+    final uri = Uri.parse(baseUrl);
+
+    debugPrint('POST URL: $uri');
+
+    final response = await http.post(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(course.toJson()),
+    );
+
+    debugPrint('POST STATUS: ${response.statusCode}');
+    debugPrint('POST RESPONSE: ${response.body}');
+
+    if (response.statusCode == 200 ||
+        response.statusCode == 201) {
+      return Course.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+    }
+
+    throw Exception(
+      'Gagal menambahkan course: '
+      'HTTP ${response.statusCode}. '
+      'Respons: ${response.body}',
+    );
+  }
+
+  @override
+  Future<Course> updateCourse(int id, Course course) async {
+    final uri = Uri.parse('$baseUrl/$id');
+
+    debugPrint('PUT URL: $uri');
+
+    final response = await http.put(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(course.toJson()),
+    );
+
+    debugPrint('PUT STATUS: ${response.statusCode}');
+    debugPrint('PUT RESPONSE: ${response.body}');
+
+    if (response.statusCode >= 200 &&
+        response.statusCode < 300) {
+      return Course.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+    }
+
+    throw Exception(
+      'Gagal memperbarui course: '
+      'HTTP ${response.statusCode}. '
+      'Respons: ${response.body}',
+    );
+  }
+
+  @override
+  Future<void> deleteCourse(int id) async {
+    final uri = Uri.parse('$baseUrl/$id');
+
+    debugPrint('DELETE URL: $uri');
+
+    final response = await http.delete(uri);
+
+    debugPrint('DELETE STATUS: ${response.statusCode}');
+    debugPrint('DELETE RESPONSE: ${response.body}');
+
+    if (response.statusCode < 200 ||
+        response.statusCode >= 300) {
+      throw Exception(
+        'Gagal menghapus course: '
+        'HTTP ${response.statusCode}. '
+        'Respons: ${response.body}',
+      );
+    }
+  }
+}
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\services\course_data_source.dart =====
+
+import '../models/course.dart';
+
+abstract class CourseDataSource {
+  Future<List<Course>> getCourses();
+
+  Future<Course> createCourse(Course course);
+
+  Future<Course> updateCourse(int id, Course course);
+
+  Future<void> deleteCourse(int id);
+}
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\services\course_service.dart =====
+
+import 'dart:convert';
+
+import 'package:flutter/services.dart' show rootBundle;
+
+import '../models/course.dart';
+
+class CourseService {
+  // Membaca dan mengubah JSON asset menjadi Map.
+  // TAHAP 15 - KASUS C
+  // Simulasi kegagalan pemuatan data.
+  Future<Map<String, dynamic>> _loadJsonData() async {
+    final jsonString = await rootBundle.loadString(
+      'assets/data/student_data.json',
+    );
+
+    return jsonDecode(jsonString) as Map<String, dynamic>;
+  }
+
+  // Memuat seluruh data yang diperlukan aplikasi.
+  // Data courses diubah menjadi List<Course>.
+  Future<Map<String, dynamic>> loadData() async {
+    final data = await _loadJsonData();
+
+    final list = data['courses'] as List<dynamic>;
+
+    final courses = list
+        .map(
+          (item) => Course.fromJson(
+            item as Map<String, dynamic>,
+          ),
+        )
+        .toList();
+
+    return {
+      'student': data['student'],
+      'courses': courses,
+    };
+  }
+
+  // TAHAP 9 - Service mengembalikan List<Course>.
+  Future<List<Course>> loadCourses() async {
+    final data = await _loadJsonData();
+
+    final list = data['courses'] as List<dynamic>;
+
+    return list
+        .map(
+          (item) => Course.fromJson(
+            item as Map<String, dynamic>,
+          ),
+        )
+        .toList();
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\services\course_supabase_service.dart =====
+
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../models/course.dart';
+import 'course_data_source.dart';
+
+class CourseSupabaseService implements CourseDataSource {
+  final supabase = Supabase.instance.client;
+
+  @override
+  Future<List<Course>> getCourses() async {
+    final data = await supabase
+        .from('courses')
+        .select()
+        .order('id');
+
+    return (data as List)
+        .map((e) => Course.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  
+  @override
+  Future<Course> createCourse(Course course) async {
+    final payload = course.toJson()
+      ..remove('id');
+
+    final row = await supabase
+        .from('courses')
+        .insert(payload)
+        .select()
+        .single();
+
+    return Course.fromJson(row);
+  }
+
+  
+@override
+Future<Course> updateCourse(int id, Course course) async {
+  final payload = course.toJson()
+    ..remove('id');
+
+  final row = await supabase
+      .from('courses')
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single();
+
+  return Course.fromJson(row);
+}
+
+
+@override
+Future<void> deleteCourse(int id) async {
+  await supabase
+      .from('courses')
+      .delete()
+      .eq('id', id);
+}
+
+}
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\models\course.dart =====
+
+class Course {
+  final int? id;
+  final String code;
+  final String title;
+  final int credits;
+  final String status;
+
+  const Course({
+    this.id,
+    required this.code,
+    required this.title,
+    required this.credits,
+    this.status = 'planned',
+  });
+
+  factory Course.fromJson(Map<String, dynamic> json) {
+    return Course(
+      id: json['id'] as int?,
+      code: json['code'] as String,
+      title: json['title'] as String,
+      credits: json['credits'] as int,
+      status: (json['status'] as String?) ?? 'planned',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'code': code,
+        'title': title,
+        'credits': credits,
+        'status': status,
+      };
+}
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\providers\course_provider.dart =====
+
+import 'package:flutter/foundation.dart';
+
+import '../models/course.dart';
+import '../repositories/course_repository.dart';
+
+class CourseProvider extends ChangeNotifier {
+  final CourseRepository repository;
+
+  CourseProvider(this.repository);
+
+  List<Course> courses = [];
+
+  bool isLoading = false;
+  bool isSaving = false;
+  bool isDeleting = false;
+
+  String? error;
+  String? refreshError;
+
+  final Set<String> favorites = {};
+
+  bool isFavorite(String code) {
+    return favorites.contains(code);
+  }
+
+  void toggleFavorite(String code) {
+    if (favorites.contains(code)) {
+      favorites.remove(code);
+    } else {
+      favorites.add(code);
+    }
+
+    notifyListeners();
+  }
+
+  List<Course> get favoriteCourses {
+    return courses
+        .where((course) => favorites.contains(course.code))
+        .toList();
+  }
+
+  Future<void> loadCourses() async {
+    isLoading = true;
+    error = null;
+    refreshError = null;
+
+    notifyListeners();
+
+    try {
+      final loadedCourses = await repository.getCourses();
+      courses = loadedCourses;
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Course> createCourse(Course course) async {
+    if (isSaving || isDeleting) {
+      throw Exception('Operasi course sedang berlangsung.');
+    }
+
+    isSaving = true;
+    error = null;
+    refreshError = null;
+
+    notifyListeners();
+
+    try {
+      final createdCourse = await repository.createCourse(course);
+
+      try {
+        final loadedCourses = await repository.getCourses();
+        courses = loadedCourses;
+      } catch (e) {
+        refreshError = e.toString();
+      }
+
+      return createdCourse;
+    } catch (e) {
+      error = e.toString();
+      rethrow;
+    } finally {
+      isSaving = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Course> updateCourse(int id, Course course) async {
+    if (isSaving || isDeleting) {
+      throw Exception('Operasi course sedang berlangsung.');
+    }
+
+    isSaving = true;
+    error = null;
+    refreshError = null;
+
+    notifyListeners();
+
+    try {
+      final updatedCourse =
+          await repository.updateCourse(id, course);
+
+      try {
+        final loadedCourses = await repository.getCourses();
+        courses = loadedCourses;
+      } catch (e) {
+        refreshError = e.toString();
+      }
+
+      return updatedCourse;
+    } catch (e) {
+      error = e.toString();
+      rethrow;
+    } finally {
+      isSaving = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteCourse(int id) async {
+    if (isSaving || isDeleting) {
+      throw Exception('Operasi course sedang berlangsung.');
+    }
+
+    final courseIndex = courses.indexWhere(
+      (course) => course.id == id,
+    );
+
+    if (courseIndex == -1) {
+      throw Exception('Course tidak ditemukan.');
+    }
+
+    final course = courses[courseIndex];
+
+    isDeleting = true;
+    error = null;
+    refreshError = null;
+
+    notifyListeners();
+
+    try {
+      // 1. Kirim permintaan DELETE ke API.
+      await repository.deleteCourse(id);
+
+      // 2. Hapus course dari daftar lokal.
+      courses.removeWhere((item) => item.id == id);
+
+      // 3. Hapus juga favorite berdasarkan kode course.
+      favorites.remove(course.code);
+
+      // 4. Coba sinkronkan ulang daftar dari API.
+      // Kegagalan GET tidak membatalkan DELETE yang berhasil.
+      try {
+        final loadedCourses = await repository.getCourses();
+        courses = loadedCourses;
+
+        // Bersihkan favorite yang tidak lagi ada di daftar.
+        final validCodes = courses
+            .map((item) => item.code)
+            .toSet();
+
+        favorites.removeWhere(
+          (code) => !validCodes.contains(code),
+        );
+      } catch (e) {
+        refreshError = e.toString();
+      }
+    } catch (e) {
+      error = e.toString();
+      rethrow;
+    } finally {
+      isDeleting = false;
+      notifyListeners();
+    }
+  }
+}
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\repositories\course_repository.dart =====
+
+import '../models/course.dart';
+import '../services/course_data_source.dart';
+
+class CourseRepository {
+  final CourseDataSource dataSource;
+
+  CourseRepository(this.dataSource);
+
+  Future<List<Course>> getCourses() {
+    return dataSource.getCourses();
+  }
+
+  Future<Course> createCourse(Course course) {
+    return dataSource.createCourse(course);
+  }
+
+  Future<Course> updateCourse(int id, Course course) {
+    return dataSource.updateCourse(id, course);
+  }
+
+  Future<void> deleteCourse(int id) {
+    return dataSource.deleteCourse(id);
+  }
+}
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\screens\auth_page.dart =====
+
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class AuthGate extends StatelessWidget {
+  final Widget child;
+
+  const AuthGate({
+    super.key,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final client = Supabase.instance.client;
+
+    return StreamBuilder<AuthState>(
+      stream: client.auth.onAuthStateChange,
+      builder: (context, snapshot) {
+        final session = snapshot.hasData
+            ? snapshot.data!.session
+            : client.auth.currentSession;
+
+        if (session == null) {
+          return const AuthPage();
+        }
+
+        return child;
+      },
+    );
+  }
+}
+
+class AuthPage extends StatefulWidget {
+  const AuthPage({super.key});
+
+  @override
+  State<AuthPage> createState() => _AuthPageState();
+}
+
+class _AuthPageState extends State<AuthPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  bool _isRegister = false;
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final auth = Supabase.instance.client.auth;
+
+      if (_isRegister) {
+        final response = await auth.signUp(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          data: {
+            'full_name': _nameController.text.trim(),
+          },
+        );
+
+        if (!mounted) return;
+
+        if (response.session == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Registrasi berhasil. Silakan periksa email untuk konfirmasi akun.',
+              ),
+            ),
+          );
+        }
+      } else {
+        await auth.signInWithPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+      }
+    } on AuthException catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password wajib diisi';
+    }
+
+    if (value.length < 6) {
+      return 'Password minimal 6 karakter';
+    }
+
+    if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d).+$').hasMatch(value)) {
+      return 'Password harus mengandung huruf dan angka';
+    }
+
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Card(
+              elevation: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.school,
+                        size: 64,
+                        color: Colors.pink,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Course Explorer',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _isRegister
+                            ? 'Buat akun baru'
+                            : 'Silakan login ke akun Anda',
+                      ),
+                      const SizedBox(height: 24),
+
+                      if (_isRegister) ...[
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Nama Lengkap',
+                            prefixIcon: Icon(Icons.person),
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Nama wajib diisi';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: Icon(Icons.email),
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Email wajib diisi';
+                          }
+
+                          if (!RegExp(
+                            r'^[^@]+@[^@]+\.[^@]+$',
+                          ).hasMatch(value.trim())) {
+                            return 'Format email tidak valid';
+                          }
+
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: const Icon(Icons.lock),
+                          border: const OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                        ),
+                        validator: _validatePassword,
+                      ),
+                      const SizedBox(height: 24),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _submit,
+                          child: _isLoading
+                              ? const CircularProgressIndicator()
+                              : Text(
+                                  _isRegister ? 'Register' : 'Login',
+                                ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      TextButton(
+                        onPressed: _isLoading
+                            ? null
+                            : () {
+                                setState(() {
+                                  _isRegister = !_isRegister;
+                                  _formKey.currentState?.reset();
+                                });
+                              },
+                        child: Text(
+                          _isRegister
+                              ? 'Sudah punya akun? Login'
+                              : 'Belum punya akun? Register',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\screens\courses_page.dart =====
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../constants.dart';
+import '../providers/course_provider.dart';
+import '../widgets/course_card.dart';
+import '../widgets/error_view.dart';
+import 'course_form_page.dart';
+
+class CoursesPage extends StatelessWidget {
+  final Map<String, dynamic> data;
+
+  const CoursesPage({
+    super.key,
+    required this.data,
+  });
+
+  int columnsFor(double width) {
+    if (width < 600) return 1;
+    if (width < 840) return 2;
+    return 3;
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    CourseProvider provider,
+    int id,
+    String code,
+    String title,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Hapus Course?'),
+          content: Text(
+            'Apakah kamu yakin ingin menghapus '
+            '"$title" ($code)?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
+              child: const Text('Hapus'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!context.mounted || confirmed != true) return;
+
+    try {
+      await provider.deleteCourse(id);
+
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Course "$title" berhasil dihapus.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menghapus course: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<CourseProvider>();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Identitas mahasiswa
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      studentName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'NIM: $studentId',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.pink.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Text(
+                'à¸…^â€¢ï»Œâ€¢^à¸…',
+                style: TextStyle(
+                  fontSize: 27,
+                  color: Colors.pink,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const Divider(height: 1),
+
+        // Judul daftar course
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Daftar Course',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Tambah Course',
+                onPressed: provider.isSaving || provider.isDeleting
+                    ? null
+                    : () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const CourseFormPage(),
+                          ),
+                        );
+                      },
+                icon: const Icon(
+                  Icons.add_circle,
+                  color: Colors.pink,
+                  size: 30,
+                ),
+              ),
+              const Icon(
+                Icons.favorite,
+                color: Colors.pink,
+              ),
+              const SizedBox(width: 4),
+              Text('${provider.favorites.length}'),
+            ],
+          ),
+        ),
+
+        if (provider.isLoading)
+          const Expanded(
+            child: Center(
+              child: CircularProgressIndicator(
+                color: Colors.pink,
+              ),
+            ),
+          )
+        else if (provider.error != null)
+          Expanded(
+            child: ErrorView(
+              message: 'Terjadi error: ${provider.error}',
+              onRetry: provider.loadCourses,
+            ),
+          )
+        else if (provider.courses.isEmpty)
+          const Expanded(
+            child: Center(
+              child: Text('Data course belum tersedia'),
+            ),
+          )
+        else
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final columns = columnsFor(constraints.maxWidth);
+
+                return GridView.builder(
+                  padding: const EdgeInsets.all(12),
+                  gridDelegate:
+                      SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    mainAxisExtent: 150,
+                  ),
+                  itemCount: provider.courses.length,
+                  itemBuilder: (context, index) {
+                    final course = provider.courses[index];
+
+                    return Stack(
+                      children: [
+                        Positioned.fill(
+                          child: CourseCard(
+                            course: course,
+                            studentData: data,
+                          ),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 44,
+                          child: Material(
+                            color: Colors.white,
+                            shape: const CircleBorder(),
+                            elevation: 2,
+                            child: IconButton(
+                              tooltip: 'Edit ${course.code}',
+                              visualDensity: VisualDensity.compact,
+                              icon: const Icon(
+                                Icons.edit,
+                                color: Colors.pink,
+                                size: 20,
+                              ),
+                              onPressed: provider.isSaving ||
+                                      provider.isDeleting
+                                  ? null
+                                  : () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => CourseFormPage(
+                                            course: course,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: Material(
+                            color: Colors.white,
+                            shape: const CircleBorder(),
+                            elevation: 2,
+                            child: IconButton(
+                              tooltip: 'Hapus ${course.code}',
+                              visualDensity: VisualDensity.compact,
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.red,
+                                size: 20,
+                              ),
+                              onPressed: provider.isDeleting ||
+                                      provider.isSaving
+                                  ? null
+                                  : () {
+                                      final id = course.id;
+
+                                      if (id == null) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Course tidak memiliki ID.',
+                                            ),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                        return;
+                                      }
+
+                                      _confirmDelete(
+                                        context,
+                                        provider,
+                                        id,
+                                        course.code,
+                                        course.title,
+                                      );
+                                    },
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\screens\course_detail_page.dart =====
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../constants.dart';
+import '../models/course.dart';
+import '../providers/course_provider.dart';
+import '../widgets/student_header.dart';
+
+class CourseDetailPage extends StatelessWidget {
+  final Course course;
+  final Map<String, dynamic> studentData;
+
+  const CourseDetailPage({
+    super.key,
+    required this.course,
+    required this.studentData,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<CourseProvider>();
+    final isFavorite = provider.isFavorite(course.code);
+    final student =
+        studentData['student'] as Map<String, dynamic>;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Detail Course'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            StudentHeader(student: student),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      course.title,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text('Kode Course: ${course.code}'),
+                    const SizedBox(height: 8),
+                    Text('Jumlah SKS: ${course.credits}'),
+                    const SizedBox(height: 8),
+                    Text('Status: ${course.status}'),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Favorit',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: isFavorite
+                              ? 'Hapus dari favorit'
+                              : 'Tambahkan ke favorit',
+                          onPressed: () {
+                            provider.toggleFavorite(course.code);
+                          },
+                          icon: Icon(
+                            isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: isFavorite
+                                ? Colors.pink
+                                : Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 32),
+                    const Text(
+                      'Identitas Mahasiswa',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text('Nama: $studentName'),
+                    Text('NIM: $studentId'),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\screens\course_form_page.dart =====
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/course.dart';
+import '../providers/course_provider.dart';
+
+class CourseFormPage extends StatefulWidget {
+  final Course? course;
+
+  const CourseFormPage({
+    super.key,
+    this.course,
+  });
+
+  bool get isEditing => course != null;
+
+  @override
+  State<CourseFormPage> createState() => _CourseFormPageState();
+}
+
+class _CourseFormPageState extends State<CourseFormPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  final _codeController = TextEditingController();
+  final _titleController = TextEditingController();
+  final _creditsController = TextEditingController();
+
+  String _status = 'planned';
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Isi form dengan data lama jika sedang mengedit.
+    final course = widget.course;
+
+    if (course != null) {
+      _codeController.text = course.code;
+      _titleController.text = course.title;
+      _creditsController.text = course.credits.toString();
+      _status = course.status;
+    }
+  }
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    _titleController.dispose();
+    _creditsController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveCourse() async {
+    if (_isSubmitting) return;
+
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final provider = context.read<CourseProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    final existingCourse = widget.course;
+
+    // Saat edit, ID lama harus dipertahankan.
+    if (existingCourse != null && existingCourse.id == null) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Course tidak memiliki ID untuk diperbarui.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final course = Course(
+      id: existingCourse?.id,
+      code: _codeController.text.trim(),
+      title: _titleController.text.trim(),
+      credits: int.parse(_creditsController.text.trim()),
+      status: _status,
+    );
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      if (widget.isEditing) {
+        await provider.updateCourse(
+          existingCourse!.id!,
+          course,
+        );
+      } else {
+        await provider.createCourse(course);
+      }
+
+      if (!mounted) return;
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            widget.isEditing
+                ? 'Permintaan update course berhasil.'
+                : 'Course berhasil dibuat.',
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      navigator.pop();
+    } catch (e) {
+      if (!mounted) return;
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            '${widget.isEditing ? 'Gagal memperbarui' : 'Gagal membuat'} '
+            'course: $e',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<CourseProvider>();
+    final isSaving = _isSubmitting || provider.isSaving;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          widget.isEditing ? 'Edit Course' : 'Tambah Course',
+        ),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _codeController,
+                readOnly: widget.isEditing,
+                decoration: InputDecoration(
+                  labelText: 'Code',
+                  hintText: 'Contoh: PTI101',
+                  border: const OutlineInputBorder(),
+                  helperText: widget.isEditing
+                      ? 'Code tidak dapat diubah saat edit.'
+                      : null,
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Code wajib diisi.';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  hintText: 'Nama course',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Title wajib diisi.';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _creditsController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Credits',
+                  hintText: 'Contoh: 3',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Credits wajib diisi.';
+                  }
+
+                  if (int.tryParse(value.trim()) == null) {
+                    return 'Credits harus berupa angka bulat.';
+                  }
+
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              DropdownButtonFormField<String>(
+                initialValue: _status,
+                decoration: const InputDecoration(
+                  labelText: 'Status',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'planned',
+                    child: Text('Planned'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'active',
+                    child: Text('Active'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'done',
+                    child: Text('Done'),
+                  ),
+                ],
+                onChanged: isSaving
+                    ? null
+                    : (value) {
+                        if (value != null) {
+                          setState(() {
+                            _status = value;
+                          });
+                        }
+                      },
+              ),
+              const SizedBox(height: 24),
+
+              ElevatedButton.icon(
+                onPressed: isSaving ? null : _saveCourse,
+                icon: isSaving
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.save),
+                label: Text(
+                  isSaving
+                      ? 'Menyimpan...'
+                      : widget.isEditing
+                          ? 'Simpan Perubahan'
+                          : 'Simpan Course',
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.all(16),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\screens\favorites_page.dart =====
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/course_provider.dart';
+import '../widgets/course_card.dart';
+
+class FavoritesPage extends StatelessWidget {
+  final Map<String, dynamic> data;
+
+  const FavoritesPage({
+    super.key,
+    required this.data,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<CourseProvider>();
+    final favoriteCourses = provider.favoriteCourses;
+
+    if (provider.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.pink),
+      );
+    }
+
+    if (favoriteCourses.isEmpty) {
+      return const Center(
+        child: Text('Belum ada course favorit'),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(12),
+      itemCount: favoriteCourses.length,
+      itemBuilder: (context, index) {
+        return CourseCard(
+          course: favoriteCourses[index],
+          studentData: data,
+        );
+      },
+    );
+  }
+}
+
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\screens\home_page.dart =====
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/course_provider.dart';
+import '../widgets/student_header.dart';
+
+class HomePage extends StatelessWidget {
+  final Map<String, dynamic> data;
+
+  const HomePage({
+    super.key,
+    required this.data,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final courseProvider = context.watch<CourseProvider>();
+    final courses = courseProvider.courses;
+
+    final completedCourses = courses
+        .where((course) => course.status.toLowerCase() == 'done')
+        .length;
+
+    final student = data['student'] as Map<String, dynamic>;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          StudentHeader(student: student),
+          const SizedBox(height: 16),
+
+          // Progress Belajar
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Progress Belajar',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.menu_book,
+                              size: 32,
+                              color: Colors.pink,
+                            ),
+                            const SizedBox(height: 8),
+                            const Text('Total Course'),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${courses.length}',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.check_circle,
+                              size: 32,
+                              color: Colors.green,
+                            ),
+                            const SizedBox(height: 8),
+                            const Text('Selesai'),
+                            const SizedBox(height: 4),
+                            Text(
+                              '$completedCourses',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Course Terbaru
+          const Text(
+            'Course Terbaru',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          if (courseProvider.isLoading)
+            const Center(
+              child: CircularProgressIndicator(
+                color: Colors.pink,
+              ),
+            )
+          else if (courseProvider.error != null)
+            const Text('Data course tidak dapat dimuat.')
+          else if (courses.isEmpty)
+            const Text('Belum ada course.')
+          else
+            ...courses.take(3).map(
+              (course) => Card(
+                child: ListTile(
+                  title: Text(
+                    course.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '${course.code} â€¢ ${course.credits} SKS',
+                  ),
+                  trailing: Text(
+                    course.status,
+                    style: TextStyle(
+                      color: course.status.toLowerCase() == 'done'
+                          ? Colors.green
+                          : Colors.pink,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\screens\profile_page.dart =====
+import 'package:flutter/material.dart';
+
+import '../constants.dart';
+import '../widgets/student_header.dart';
+
+class ProfilePage extends StatefulWidget {
+  final Map<String, dynamic> data;
+
+  const ProfilePage({
+    super.key,
+    required this.data,
+  });
+
+  // TAHAP 15 - KASUS D
+  // Pastikan widget masih aktif sebelum setState.
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final _formKey = GlobalKey<FormState>();
+
+  final _nameController = TextEditingController();
+  final _nimController = TextEditingController();
+  final _commentController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _nameController.text = studentName;
+    _nimController.text = studentId;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _nimController.dispose();
+    _commentController.dispose();
+
+    super.dispose();
+  }
+
+  void _submitFeedback() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Feedback berhasil dikirim'),
+      ),
+    );
+
+    _commentController.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final student = widget.data['student'] as Map<String, dynamic>;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          StudentHeader(student: student),
+          const SizedBox(height: 16),
+          const Text(
+            'Profil Mahasiswa',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text('Nama: $studentName'),
+          Text('NIM: $studentId'),
+          const SizedBox(height: 24),
+          const Text(
+            'Formulir Feedback',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nama',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Nama wajib diisi';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _nimController,
+                  decoration: const InputDecoration(
+                    labelText: 'NIM',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'NIM wajib diisi';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _commentController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Komentar',
+                    hintText: 'Minimal 5 karakter',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().length < 5) {
+                      return 'Komentar minimal 5 karakter';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _submitFeedback,
+                    child: const Text('Kirim Feedback'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+

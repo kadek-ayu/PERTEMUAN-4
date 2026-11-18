@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../services/auth_service.dart';
+
 class AuthGate extends StatelessWidget {
   final Widget child;
 
@@ -48,6 +50,8 @@ class _AuthPageState extends State<AuthPage> {
   bool _isLoading = false;
   bool _obscurePassword = true;
 
+  String _role = 'seeker';
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -62,15 +66,12 @@ class _AuthPageState extends State<AuthPage> {
     setState(() => _isLoading = true);
 
     try {
-      final auth = Supabase.instance.client.auth;
-
       if (_isRegister) {
-        final response = await auth.signUp(
+        final response = await AuthService.instance.register(
           email: _emailController.text.trim(),
           password: _passwordController.text,
-          data: {
-            'full_name': _nameController.text.trim(),
-          },
+          name: _nameController.text.trim(),
+          role: _role,
         );
 
         if (!mounted) return;
@@ -85,7 +86,7 @@ class _AuthPageState extends State<AuthPage> {
           );
         }
       } else {
-        await auth.signInWithPassword(
+        await AuthService.instance.login(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
@@ -179,6 +180,37 @@ class _AuthPageState extends State<AuthPage> {
                           },
                         ),
                         const SizedBox(height: 16),
+
+                        DropdownButtonFormField<String>(
+                          initialValue: _role,
+                          decoration: const InputDecoration(
+                            labelText: 'Pilih Role Pengguna',
+                            prefixIcon: Icon(Icons.manage_accounts),
+                            border: OutlineInputBorder(),
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'seeker',
+                              child: Text('Pengguna (Seeker)'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'owner',
+                              child: Text('Pemilik (Owner)'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _role = value ?? 'seeker';
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Silakan pilih role pengguna';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
                       ],
 
                       TextFormField(
@@ -249,6 +281,7 @@ class _AuthPageState extends State<AuthPage> {
                             : () {
                                 setState(() {
                                   _isRegister = !_isRegister;
+                                  _role = 'seeker';
                                   _formKey.currentState?.reset();
                                 });
                               },
