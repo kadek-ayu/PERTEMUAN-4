@@ -3,18 +3,33 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../constants.dart';
+import '../models/course.dart';
 import '../providers/course_provider.dart';
+import '../services/profile_service.dart';
 import '../widgets/course_card.dart';
 import '../widgets/error_view.dart';
 import 'course_form_page.dart';
 
-class CoursesPage extends StatelessWidget {
+class CoursesPage extends StatefulWidget {
   final Map<String, dynamic> data;
 
   const CoursesPage({
     super.key,
     required this.data,
   });
+
+  @override
+  State<CoursesPage> createState() => _CoursesPageState();
+}
+
+class _CoursesPageState extends State<CoursesPage> {
+  late Future<UserProfile?> _profileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileFuture = ProfileService().getMyProfile();
+  }
 
   int columnsFor(double width) {
     if (width < 600) return 1;
@@ -85,225 +100,261 @@ class CoursesPage extends StatelessWidget {
     }
   }
 
+  void _openAddCourse() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const CourseFormPage(),
+      ),
+    );
+  }
+
+  void _openEditCourse(Course course) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CourseFormPage(
+          course: course,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CourseProvider>();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Identitas mahasiswa
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      studentName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'NIM: $studentId',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.pink.shade700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Text(
-                'ฅ^•ﻌ•^ฅ',
-                style: TextStyle(
-                  fontSize: 27,
-                  color: Colors.pink,
-                ),
-              ),
-            ],
-          ),
-        ),
+    return FutureBuilder<UserProfile?>(
+      future: _profileFuture,
+      builder: (context, profileSnapshot) {
+        final userRole = profileSnapshot.data?.role
+                .toLowerCase()
+                .trim() ??
+            '';
 
-        const Divider(height: 1),
+        final canManageCourses =
+            userRole == 'owner' || userRole == 'admin';
 
-        // Judul daftar course
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'Daftar Course',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              IconButton(
-                tooltip: 'Tambah Course',
-                onPressed: provider.isSaving || provider.isDeleting
-                    ? null
-                    : () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const CourseFormPage(),
-                          ),
-                        );
-                      },
-                icon: const Icon(
-                  Icons.add_circle,
-                  color: Colors.pink,
-                  size: 30,
-                ),
-              ),
-              const Icon(
-                Icons.favorite,
-                color: Colors.pink,
-              ),
-              const SizedBox(width: 4),
-              Text('${provider.favorites.length}'),
-            ],
-          ),
-        ),
-
-        if (provider.isLoading)
-          const Expanded(
-            child: Center(
-              child: CircularProgressIndicator(
-                color: Colors.pink,
-              ),
-            ),
-          )
-        else if (provider.error != null)
-          Expanded(
-            child: ErrorView(
-              message: 'Terjadi error: ${provider.error}',
-              onRetry: provider.loadCourses,
-            ),
-          )
-        else if (provider.courses.isEmpty)
-          const Expanded(
-            child: Center(
-              child: Text('Data course belum tersedia'),
-            ),
-          )
-        else
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final columns = columnsFor(constraints.maxWidth);
-
-                return GridView.builder(
-                  padding: const EdgeInsets.all(12),
-                  gridDelegate:
-                      SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: columns,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    mainAxisExtent: 150,
-                  ),
-                  itemCount: provider.courses.length,
-                  itemBuilder: (context, index) {
-                    final course = provider.courses[index];
-
-                    return Stack(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Identitas mahasiswa
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Positioned.fill(
-                          child: CourseCard(
-                            course: course,
-                            studentData: data,
+                        Text(
+                          studentName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Positioned(
-                          top: 4,
-                          right: 44,
-                          child: Material(
-                            color: Colors.white,
-                            shape: const CircleBorder(),
-                            elevation: 2,
-                            child: IconButton(
-                              tooltip: 'Edit ${course.code}',
-                              visualDensity: VisualDensity.compact,
-                              icon: const Icon(
-                                Icons.edit,
-                                color: Colors.pink,
-                                size: 20,
-                              ),
-                              onPressed: provider.isSaving ||
-                                      provider.isDeleting
-                                  ? null
-                                  : () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (_) => CourseFormPage(
-                                            course: course,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          top: 4,
-                          right: 4,
-                          child: Material(
-                            color: Colors.white,
-                            shape: const CircleBorder(),
-                            elevation: 2,
-                            child: IconButton(
-                              tooltip: 'Hapus ${course.code}',
-                              visualDensity: VisualDensity.compact,
-                              icon: const Icon(
-                                Icons.delete_outline,
-                                color: Colors.red,
-                                size: 20,
-                              ),
-                              onPressed: provider.isDeleting ||
-                                      provider.isSaving
-                                  ? null
-                                  : () {
-                                      final id = course.id;
-
-                                      if (id == null) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Course tidak memiliki ID.',
-                                            ),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        );
-                                        return;
-                                      }
-
-                                      _confirmDelete(
-                                        context,
-                                        provider,
-                                        id,
-                                        course.code,
-                                        course.title,
-                                      );
-                                    },
-                            ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'NIM: $studentId',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.pink.shade700,
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                  const Text(
+                    '♡',
+                    style: TextStyle(
+                      fontSize: 30,
+                      color: Colors.pink,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const Divider(height: 1),
+
+            // Judul daftar course
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Daftar Course',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+
+                  // Tombol tambah hanya untuk owner dan admin
+                  if (canManageCourses)
+                    IconButton(
+                      tooltip: 'Tambah Course',
+                      onPressed: provider.isSaving ||
+                              provider.isDeleting
+                          ? null
+                          : _openAddCourse,
+                      icon: const Icon(
+                        Icons.add_circle,
+                        color: Colors.pink,
+                        size: 30,
+                      ),
+                    ),
+
+                  const Icon(
+                    Icons.favorite,
+                    color: Colors.pink,
+                  ),
+                  const SizedBox(width: 4),
+                  Text('${provider.favorites.length}'),
+                ],
+              ),
+            ),
+
+            // Status data course
+            if (provider.isLoading)
+              const Expanded(
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.pink,
+                  ),
+                ),
+              )
+            else if (provider.error != null)
+              Expanded(
+                child: ErrorView(
+                  message: 'Terjadi error: ${provider.error}',
+                  onRetry: provider.loadCourses,
+                ),
+              )
+            else if (provider.courses.isEmpty)
+              const Expanded(
+                child: Center(
+                  child: Text('Data course belum tersedia'),
+                ),
+              )
+            else
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final columns =
+                        columnsFor(constraints.maxWidth);
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(12),
+                      gridDelegate:
+                          SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: columns,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        mainAxisExtent: 150,
+                      ),
+                      itemCount: provider.courses.length,
+                      itemBuilder: (context, index) {
+                        final course = provider.courses[index];
+
+                        return Stack(
+                          children: [
+                            Positioned.fill(
+                              child: CourseCard(
+                                course: course,
+                                studentData: widget.data,
+                              ),
+                            ),
+
+                            // Tombol edit dan hapus
+                            // hanya untuk owner dan admin
+                            if (canManageCourses) ...[
+                              Positioned(
+                                top: 4,
+                                right: 44,
+                                child: Material(
+                                  color: Colors.white,
+                                  shape: const CircleBorder(),
+                                  elevation: 2,
+                                  child: IconButton(
+                                    tooltip: 'Edit ${course.code}',
+                                    visualDensity:
+                                        VisualDensity.compact,
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Colors.pink,
+                                      size: 20,
+                                    ),
+                                    onPressed: provider.isSaving ||
+                                            provider.isDeleting
+                                        ? null
+                                        : () {
+                                            _openEditCourse(course);
+                                          },
+                                  ),
+                                ),
+                              ),
+
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: Material(
+                                  color: Colors.white,
+                                  shape: const CircleBorder(),
+                                  elevation: 2,
+                                  child: IconButton(
+                                    tooltip: 'Hapus ${course.code}',
+                                    visualDensity:
+                                        VisualDensity.compact,
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      color: Colors.red,
+                                      size: 20,
+                                    ),
+                                    onPressed: provider.isDeleting ||
+                                            provider.isSaving
+                                        ? null
+                                        : () {
+                                            final id = course.id;
+
+                                            if (id == null) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Course tidak memiliki ID.',
+                                                  ),
+                                                  backgroundColor:
+                                                      Colors.red,
+                                                ),
+                                              );
+                                              return;
+                                            }
+
+                                            _confirmDelete(
+                                              context,
+                                              provider,
+                                              id,
+                                              course.code,
+                                              course.title,
+                                            );
+                                          },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        );
+                      },
                     );
                   },
-                );
-              },
-            ),
-          ),
-      ],
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
