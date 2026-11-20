@@ -18,6 +18,30 @@ import 'screens/courses_page.dart';
 import 'screens/favorites_page.dart';
 import 'screens/profile_page.dart';
 
+// Global key untuk menampilkan SnackBar dari listener FCM.
+final GlobalKey<ScaffoldMessengerState> messengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
+// Background handler harus berupa fungsi top-level,
+// yaitu berada di luar class.
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(
+  RemoteMessage message,
+) async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  debugPrint('================================');
+  debugPrint('[BACKGROUND] NOTIFIKASI DITERIMA');
+  debugPrint('Judul: ${message.notification?.title}');
+  debugPrint('Isi: ${message.notification?.body}');
+  debugPrint('Data: ${message.data}');
+  debugPrint('================================');
+}
+
 const String supabaseUrl =
     'https://qscxrkgqvysjaliyupcf.supabase.co';
 
@@ -27,28 +51,36 @@ const String supabaseAnonKey =
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inisialisasi Firebase
+  // Inisialisasi Firebase.
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Inisialisasi Supabase
+  // Daftarkan background handler setelah Firebase diinisialisasi.
+  FirebaseMessaging.onBackgroundMessage(
+    firebaseMessagingBackgroundHandler,
+  );
+
+  // Inisialisasi Supabase.
   await Supabase.initialize(
     url: supabaseUrl,
     publishableKey: supabaseAnonKey,
   );
 
-  // Meminta izin notifikasi
-  await FirebaseMessaging.instance.requestPermission(
+  final messaging = FirebaseMessaging.instance;
+
+  // Meminta izin notifikasi.
+  final permission = await messaging.requestPermission(
     alert: true,
     badge: true,
     sound: true,
   );
 
-  // Registrasi perangkat menggunakan Firebase Installation ID
-  final messaging = FirebaseMessaging.instance;
+  debugPrint(
+    'Status permission notification: ${permission.authorizationStatus}',
+  );
 
-  // Dengarkan hasil registrasi sebelum memanggil register()
+  // Dengarkan hasil registrasi sebelum register().
   messaging.onRegistered.listen(
     (String installationId) {
       debugPrint('================================');
@@ -61,7 +93,7 @@ Future<void> main() async {
     },
   );
 
-  // Registrasikan perangkat ke Firebase Cloud Messaging
+  // Registrasikan perangkat ke Firebase.
   try {
     await messaging.register();
     debugPrint('Registrasi perangkat FCM berhasil.');
@@ -69,16 +101,40 @@ Future<void> main() async {
     debugPrint('Gagal melakukan registrasi FCM: $e');
   }
 
-  // Mendeteksi pesan ketika aplikasi sedang terbuka
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    debugPrint('================================');
-    debugPrint('NOTIFIKASI FCM DITERIMA');
-    debugPrint('Judul: ${message.notification?.title}');
-    debugPrint('Isi: ${message.notification?.body}');
-    debugPrint('================================');
-  });
+  // FOREGROUND: aplikasi sedang terbuka.
+  FirebaseMessaging.onMessage.listen(
+    (RemoteMessage message) {
+      debugPrint('================================');
+      debugPrint('[FOREGROUND] NOTIFIKASI DITERIMA');
+      debugPrint('Judul: ${message.notification?.title}');
+      debugPrint('Isi: ${message.notification?.body}');
+      debugPrint('Data: ${message.data}');
+      debugPrint('================================');
 
-  final CourseDataSource dataSource = CourseSupabaseService();
+      // Tampilkan pesan di dalam aplikasi.
+      final title =
+          message.notification?.title ?? 'Notifikasi';
+
+      final body =
+          message.notification?.body ?? '';
+
+      messengerKey.currentState
+          ?.hideCurrentSnackBar();
+
+      messengerKey.currentState?.showSnackBar(
+        SnackBar(
+          content: Text(
+            body.isEmpty ? title : '$title\n$body',
+          ),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    },
+  );
+
+  final CourseDataSource dataSource =
+      CourseSupabaseService();
+
   final repository = CourseRepository(dataSource);
 
   runApp(
@@ -95,6 +151,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: messengerKey,
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
       theme: ThemeData(
@@ -121,7 +178,8 @@ class ResponsiveShell extends StatefulWidget {
   const ResponsiveShell({super.key});
 
   @override
-  State<ResponsiveShell> createState() => _ResponsiveShellState();
+  State<ResponsiveShell> createState() =>
+      _ResponsiveShellState();
 }
 
 class _ResponsiveShellState extends State<ResponsiveShell> {
@@ -302,7 +360,8 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
       currentIndex = 0;
     }
 
-    final page = _buildCurrentPage(items[currentIndex].key);
+    final page =
+        _buildCurrentPage(items[currentIndex].key);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -343,7 +402,8 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
       body: FutureBuilder<UserProfile?>(
         future: _profileFuture,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState ==
+              ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(),
             );
@@ -429,7 +489,8 @@ class AdminManagementPage extends StatelessWidget {
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: _loadUsers(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState ==
+            ConnectionState.waiting) {
           return const Center(
             child: CircularProgressIndicator(),
           );

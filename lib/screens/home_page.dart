@@ -4,14 +4,38 @@ import 'package:provider/provider.dart';
 
 import '../providers/course_provider.dart';
 import '../widgets/student_header.dart';
+import '../services/notification_service.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final Map<String, dynamic> data;
 
   const HomePage({
     super.key,
     required this.data,
   });
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+
+    _requestNotificationPermission();
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    try {
+      final status =
+          await NotificationService.instance.requestPermission();
+
+      debugPrint('Status permission notification: ${status.name}');
+    } catch (e) {
+      debugPrint('Gagal meminta izin notifikasi: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +46,7 @@ class HomePage extends StatelessWidget {
         .where((course) => course.status.toLowerCase() == 'done')
         .length;
 
-    final student = data['student'] as Map<String, dynamic>;
+    final student = widget.data['student'] as Map<String, dynamic>;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
