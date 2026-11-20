@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'constants.dart';
 import 'services/course_data_source.dart';
 import 'services/course_supabase_service.dart';
+import 'services/profile_service.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
 import 'screens/auth_page.dart';
@@ -17,10 +18,10 @@ import 'screens/profile_page.dart';
 const String supabaseUrl =
     'https://qscxrkgqvysjaliyupcf.supabase.co';
 
-// Gunakan kembali publishable/anon key yang sudah ada
-// pada main.dart milikmu sebelumnya.
-// Jangan menggantinya dengan service_role key.
-const String supabaseAnonKey = 'sb_publishable_aB6BsNU3QhvOkVqq2rMTew_9TpElf8A';
+// Gunakan publishable/anon key milik project Supabase.
+// Jangan gunakan service_role key di aplikasi Flutter.
+const String supabaseAnonKey =
+    'sb_publishable_aB6BsNU3QhvOkVqq2rMTew_9TpElf8A';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -79,6 +80,8 @@ class ResponsiveShell extends StatefulWidget {
 class _ResponsiveShellState extends State<ResponsiveShell> {
   int currentIndex = 0;
 
+  late Future<UserProfile?> _profileFuture;
+
   final Map<String, dynamic> studentData = {
     'student': {
       'name': studentName,
@@ -86,20 +89,77 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     },
   };
 
-  Widget buildCurrentPage() {
-    if (currentIndex == 0) {
-      return HomePage(data: studentData);
+  @override
+  void initState() {
+    super.initState();
+    _profileFuture = ProfileService().getMyProfile();
+  }
+
+  List<_NavItem> _getNavigationItems(String role) {
+    final items = <_NavItem>[
+      _NavItem(
+        key: 'home',
+        label: 'Home',
+        icon: Icons.home,
+      ),
+      _NavItem(
+        key: 'courses',
+        label: 'Courses',
+        icon: Icons.school,
+      ),
+    ];
+
+    if (role == 'seeker') {
+      items.add(
+        _NavItem(
+          key: 'favorites',
+          label: 'Favorites',
+          icon: Icons.favorite,
+        ),
+      );
     }
 
-    if (currentIndex == 1) {
-      return CoursesPage(data: studentData);
+    if (role == 'admin') {
+      items.add(
+        _NavItem(
+          key: 'admin',
+          label: 'Manajemen Pengguna',
+          icon: Icons.manage_accounts,
+        ),
+      );
     }
 
-    if (currentIndex == 2) {
-      return FavoritesPage(data: studentData);
-    }
+    items.add(
+      _NavItem(
+        key: 'profile',
+        label: 'Profile',
+        icon: Icons.person,
+      ),
+    );
 
-    return ProfilePage(data: studentData);
+    return items;
+  }
+
+  Widget _buildCurrentPage(String key) {
+    switch (key) {
+      case 'home':
+        return HomePage(data: studentData);
+
+      case 'courses':
+        return CoursesPage(data: studentData);
+
+      case 'favorites':
+        return FavoritesPage(data: studentData);
+
+      case 'admin':
+        return const AdminManagementPage();
+
+      case 'profile':
+        return ProfilePage(data: studentData);
+
+      default:
+        return HomePage(data: studentData);
+    }
   }
 
   Future<void> _logout() async {
@@ -142,7 +202,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     }
   }
 
-  NavigationBar buildNavigationBar() {
+  Widget _buildNavigationBar(List<_NavItem> items) {
     return NavigationBar(
       selectedIndex: currentIndex,
       onDestinationSelected: (index) {
@@ -150,28 +210,16 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
           currentIndex = index;
         });
       },
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.school),
-          label: 'Courses',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.favorite),
-          label: 'Favorites',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.person),
-          label: 'Profile',
-        ),
-      ],
+      destinations: items.map((item) {
+        return NavigationDestination(
+          icon: Icon(item.icon),
+          label: item.label,
+        );
+      }).toList(),
     );
   }
 
-  NavigationRail buildNavigationRail() {
+  Widget _buildNavigationRail(List<_NavItem> items) {
     return NavigationRail(
       selectedIndex: currentIndex,
       onDestinationSelected: (index) {
@@ -179,33 +227,58 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
           currentIndex = index;
         });
       },
-      destinations: const [
-        NavigationRailDestination(
-          icon: Icon(Icons.home),
-          label: Text('Home'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.school),
-          label: Text('Courses'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.favorite),
-          label: Text('Favorites'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.person),
-          label: Text('Profile'),
-        ),
-      ],
+      labelType: NavigationRailLabelType.all,
+      destinations: items.map((item) {
+        return NavigationRailDestination(
+          icon: Icon(item.icon),
+          label: Text(item.label),
+        );
+      }).toList(),
     );
   }
-// ==========================================
-// PRAKTIK 2: AUTHENTICATION SESSION & LOGOUT
-// ==========================================
 
-// Memeriksa session pengguna ketika aplikasi pertama kali dibuka.
-// Jika session masih aktif, pengguna diarahkan ke halaman utama.
-// Jika session tidak tersedia, pengguna diarahkan ke halaman login.
+  Widget _buildRoleLayout(
+    BuildContext context,
+    UserProfile profile,
+  ) {
+    final role = profile.role.toLowerCase().trim();
+
+    if (!['seeker', 'owner', 'admin'].contains(role)) {
+      return const Center(
+        child: Text('Role akun tidak dikenali.'),
+      );
+    }
+
+    final items = _getNavigationItems(role);
+
+    if (currentIndex >= items.length) {
+      currentIndex = 0;
+    }
+
+    final page = _buildCurrentPage(items[currentIndex].key);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 840) {
+          return Column(
+            children: [
+              Expanded(child: page),
+              _buildNavigationBar(items),
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            _buildNavigationRail(items),
+            const VerticalDivider(width: 1),
+            Expanded(child: page),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -220,32 +293,155 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
           ),
         ],
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final page = buildCurrentPage();
-
-          if (constraints.maxWidth < 840) {
-            return page;
+      body: FutureBuilder<UserProfile?>(
+        future: _profileFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           }
 
-          return Row(
-            children: [
-              buildNavigationRail(),
-              const VerticalDivider(width: 1),
-              Expanded(child: page),
-            ],
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 45,
+                      color: Colors.red,
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Gagal mengambil profil pengguna.',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _profileFuture =
+                              ProfileService().getMyProfile();
+                        });
+                      },
+                      child: const Text('Coba Lagi'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final profile = snapshot.data;
+
+          if (profile == null) {
+            return const Center(
+              child: Text(
+                'Profil pengguna tidak ditemukan di Supabase.',
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+
+          return _buildRoleLayout(context, profile);
+        },
+      ),
+    );
+  }
+}
+
+class _NavItem {
+  final String key;
+  final String label;
+  final IconData icon;
+
+  const _NavItem({
+    required this.key,
+    required this.label,
+    required this.icon,
+  });
+}
+
+class AdminManagementPage extends StatelessWidget {
+  const AdminManagementPage({super.key});
+
+  Future<List<Map<String, dynamic>>> _loadUsers() async {
+    final data = await Supabase.instance.client
+        .from('profiles')
+        .select('id, email, name, role')
+        .order('name');
+
+    return List<Map<String, dynamic>>.from(data);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _loadUsers(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
           );
-        },
-      ),
-      bottomNavigationBar: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 840) {
-            return buildNavigationBar();
-          }
+        }
 
-          return const SizedBox.shrink();
-        },
-      ),
+        if (snapshot.hasError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                'Gagal memuat pengguna.\n${snapshot.error}',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        }
+
+        final users = snapshot.data ?? [];
+
+        if (users.isEmpty) {
+          return const Center(
+            child: Text('Belum ada data pengguna.'),
+          );
+        }
+
+        return ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            const Text(
+              'Manajemen Pengguna',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text('Total pengguna: ${users.length}'),
+            const SizedBox(height: 16),
+            ...users.map((user) {
+              final name = user['name'] ?? 'Tanpa nama';
+              final email = user['email'] ?? '-';
+              final role = user['role'] ?? '-';
+
+              return Card(
+                child: ListTile(
+                  leading: const CircleAvatar(
+                    child: Icon(Icons.person),
+                  ),
+                  title: Text(name.toString()),
+                  subtitle: Text(
+                    '$email\nRole: $role',
+                  ),
+                  isThreeLine: true,
+                ),
+              );
+            }),
+          ],
+        );
+      },
     );
   }
 }

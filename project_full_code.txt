@@ -1,0 +1,3933 @@
+﻿===== DAFTAR DAN SOURCE CODE PROYEK =====
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\analysis_options.yaml =====
+
+# This file configures the analyzer, which statically analyzes Dart code to
+# check for errors, warnings, and lints.
+#
+# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
+# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
+# invoked from the command line by running `flutter analyze`.
+
+# The following line activates a set of recommended lints for Flutter apps,
+# packages, and plugins designed to encourage good coding practices.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+
+linter:
+  # The lint rules applied to this project can be customized in the
+  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
+  # included above or to enable additional rules. A list of all available lints
+  # and their documentation is published at https://dart.dev/lints.
+  #
+  # Instead of disabling a lint rule for the entire project in the
+  # section below, it can also be suppressed for a single line of code
+  # or a specific dart file by using the `// ignore: name_of_lint` and
+  # `// ignore_for_file: name_of_lint` syntax on the line or in the file
+  # producing the lint.
+  rules:
+    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
+    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\pubspec.yaml =====
+
+name: flutter_ui_fundamentals
+description: "A new Flutter project."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# In Windows, build-name is used as the major, minor, and patch parts
+# of the product and file versions while build-number is used as the build suffix.
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.2
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.5+1
+  http: ^1.6.0
+  supabase_flutter: ^2.18.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^6.0.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+  
+  assets:
+    - assets/profile.jpeg
+    - assets/data/
+  # To add assets to your application, add an assets section, like this:
+  # assets:
+  #   - images/a_dot_burr.jpeg
+  #   - images/a_dot_ham.jpeg
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\README.md =====
+
+# Flutter UI Fundamentals â€” Course Explorer
+
+Aplikasi Course Explorer dibuat menggunakan Flutter untuk menampilkan daftar mata kuliah, detail mata kuliah, status penyelesaian, dan fitur favorit. Aplikasi juga menampilkan identitas mahasiswa serta mendukung navigasi yang adaptif.
+
+## Struktur Folder dan Tanggung Jawab
+
+* **`lib/models/`**
+  Menyimpan model data, seperti `Course`, untuk merepresentasikan informasi mata kuliah.
+
+* **`lib/providers/`**
+  Mengelola state aplikasi, termasuk daftar mata kuliah, status loading, pesan error, dan daftar favorit.
+
+* **`lib/repositories/`**
+  Menjadi perantara antara Provider dan Service dalam pengambilan data.
+
+* **`lib/services/`**
+  Menangani sumber data, termasuk membaca file JSON dari assets dan mengubahnya menjadi objek yang dapat digunakan aplikasi.
+
+* **`lib/screens/`**
+  Menyimpan halaman aplikasi, seperti Home, Courses, Favorites, Profile, dan Detail Course.
+
+* **`lib/widgets/`**
+  Menyimpan widget yang dapat digunakan kembali, seperti `CourseCard` dan `StudentHeader`.
+
+* **`lib/constants.dart`**
+  Menyimpan konstanta yang digunakan bersama, seperti nama dan NIM mahasiswa.
+
+* **`lib/course_state.dart`**
+  Jika file ini masih digunakan, jelaskan tanggung jawab sebenarnya berdasarkan isi kodenya. Jika tidak digunakan, periksa dahulu sebelum menghapusnya.
+
+* **`lib/main.dart`**
+  Menjadi titik masuk aplikasi, mengatur konfigurasi `MaterialApp`, Provider, serta navigasi dan layout utama.
+
+* **`assets/data/`**
+  Menyimpan data JSON mahasiswa dan mata kuliah yang digunakan aplikasi.
+
+## Arah Dependency
+
+Arah dependency yang diterapkan untuk pengambilan data mata kuliah adalah:
+
+`Screen/Widget â†’ Provider â†’ Repository â†’ Service/Data Source`
+
+Screen dan widget menampilkan data serta menerima interaksi pengguna. Provider mengelola state, Repository menjadi perantara pengambilan data, sedangkan Service menangani akses ke sumber data.
+
+UI tidak membaca JSON secara langsung menggunakan `rootBundle` atau `jsonDecode`.
+
+## Teknologi
+
+* Flutter
+* Dart
+* Provider
+* JSON assets
+
+## Identitas Mahasiswa
+
+* Nama: Kadek Ayu Aulia
+* NIM: 2415051041
+* Kelas: PTI 4C
+
+Pengamatan REST Endpoint
+
+API latihan yang digunakan: JSONPlaceholder.
+
+Endpoint URL: https://jsonplaceholder.typicode.com/posts/1
+
+HTTP Method: GET
+
+Resource: Satu data post dengan ID 1
+
+Format Response: JSON
+
+Field JSON yang ditemukan
+
+userId: ID pengguna yang membuat post.
+
+id: ID post.
+
+title: Judul post.
+
+body: Isi post.
+
+Hasil Pengamatan
+
+Endpoint mengembalikan satu data post dalam format JSON. Data tersebut memiliki empat field, yaitu userId, id, title, dan body.
+
+API ini digunakan sebagai API latihan untuk memahami konsep endpoint, request GET, response, dan JSON. Data yang dikembalikan merupakan data post, bukan data mata kuliah (course).
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\android\gradle.properties =====
+
+org.gradle.jvmargs=-Xmx8G -XX:MaxMetaspaceSize=4G -XX:ReservedCodeCacheSize=512m -XX:+HeapDumpOnOutOfMemoryError
+android.useAndroidX=true
+# This newDsl flag was added by the Flutter template
+android.newDsl=false
+# This builtInKotlin flag was added by the Flutter template
+android.builtInKotlin=false
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\android\local.properties =====
+
+sdk.dir=C:\\Users\\putu\\AppData\\Local\\Android\\sdk
+flutter.sdk=D:\\flutter
+flutter.buildMode=debug
+flutter.versionName=1.0.0
+flutter.versionCode=1
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\android\.gradle\9.3.1\gc.properties =====
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\android\.gradle\vcs-1\gc.properties =====
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\android\app\src\debug\AndroidManifest.xml =====
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The INTERNET permission is required for development. Specifically,
+         the Flutter tool needs it to communicate with the running application
+         to allow setting breakpoints, to provide hot reload, etc.
+    -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+</manifest>
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\android\app\src\main\AndroidManifest.xml =====
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:label="flutter_ui_fundamentals"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <!-- Specifies an Android theme to apply to this Activity as soon as
+                 the Android process has started. This theme is visible to the user
+                 while the Flutter UI initializes. After that, this theme continues
+                 to determine the Window background behind the Flutter UI. -->
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <!-- Don't delete the meta-data below.
+             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+    <!-- Required to query activities that can process text, see:
+         https://developer.android.com/training/package-visibility and
+         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+
+         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
+</manifest>
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\android\app\src\main\java\io\flutter\plugins\GeneratedPluginRegistrant.java =====
+
+package io.flutter.plugins;
+
+import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
+import io.flutter.Log;
+
+import io.flutter.embedding.engine.FlutterEngine;
+
+/**
+ * Generated file. Do not edit.
+ * This file is generated by the Flutter tool based on the
+ * plugins that support the Android platform.
+ */
+@Keep
+public final class GeneratedPluginRegistrant {
+  private static final String TAG = "GeneratedPluginRegistrant";
+  public static void registerWith(@NonNull FlutterEngine flutterEngine) {
+    try {
+      flutterEngine.getPlugins().add(new com.llfbandit.app_links.AppLinksPlugin());
+    } catch (Exception e) {
+      Log.e(TAG, "Error registering plugin app_links, com.llfbandit.app_links.AppLinksPlugin", e);
+    }
+    try {
+      flutterEngine.getPlugins().add(new com.github.dart_lang.jni.JniPlugin());
+    } catch (Exception e) {
+      Log.e(TAG, "Error registering plugin jni, com.github.dart_lang.jni.JniPlugin", e);
+    }
+    try {
+      flutterEngine.getPlugins().add(new io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin());
+    } catch (Exception e) {
+      Log.e(TAG, "Error registering plugin shared_preferences_android, io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin", e);
+    }
+    try {
+      flutterEngine.getPlugins().add(new io.flutter.plugins.urllauncher.UrlLauncherPlugin());
+    } catch (Exception e) {
+      Log.e(TAG, "Error registering plugin url_launcher_android, io.flutter.plugins.urllauncher.UrlLauncherPlugin", e);
+    }
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\android\app\src\main\kotlin\com\example\flutter_ui_fundamentals\MainActivity.kt =====
+
+package com.example.flutter_ui_fundamentals
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\android\app\src\main\res\drawable\launch_background.xml =====
+
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modify this file to customize your launch splash screen -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@android:color/white" />
+
+    <!-- You can insert your own image assets here -->
+    <!-- <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@mipmap/launch_image" />
+    </item> -->
+</layer-list>
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\android\app\src\main\res\drawable-v21\launch_background.xml =====
+
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modify this file to customize your launch splash screen -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="?android:colorBackground" />
+
+    <!-- You can insert your own image assets here -->
+    <!-- <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@mipmap/launch_image" />
+    </item> -->
+</layer-list>
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\android\app\src\main\res\values\styles.xml =====
+
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Theme applied to the Android Window while the process is starting when the OS's Dark Mode setting is off -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <!-- Show a splash screen on the activity. Automatically removed when
+             the Flutter engine draws its first frame -->
+        <item name="android:windowBackground">@drawable/launch_background</item>
+    </style>
+    <!-- Theme applied to the Android Window as soon as the process has started.
+         This theme determines the color of the Android Window while your
+         Flutter UI initializes, as well as behind your Flutter UI while its
+         running.
+
+         This Theme is only used starting with V2 of Flutter's Android embedding. -->
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\android\app\src\main\res\values-night\styles.xml =====
+
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Theme applied to the Android Window while the process is starting when the OS's Dark Mode setting is on -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <!-- Show a splash screen on the activity. Automatically removed when
+             the Flutter engine draws its first frame -->
+        <item name="android:windowBackground">@drawable/launch_background</item>
+    </style>
+    <!-- Theme applied to the Android Window as soon as the process has started.
+         This theme determines the color of the Android Window while your
+         Flutter UI initializes, as well as behind your Flutter UI while its
+         running.
+
+         This Theme is only used starting with V2 of Flutter's Android embedding. -->
+    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\android\app\src\profile\AndroidManifest.xml =====
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The INTERNET permission is required for development. Specifically,
+         the Flutter tool needs it to communicate with the running application
+         to allow setting breakpoints, to provide hot reload, etc.
+    -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+</manifest>
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\android\gradle\wrapper\gradle-wrapper.properties =====
+
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.3.1-all.zip
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\assets\data\student_data.json =====
+
+{
+  "student": {
+    "nim": "2415051041",
+    "name": "Kadek Ayu Aulia"
+  },
+  "courses": [
+    {
+      "code": "MOB01",
+      "title": "Git & GitHub",
+      "credits": 2,
+      "status": "done"
+    },
+    {
+      "code": "MOB02",
+      "title": "Dart Fundamentals",
+      "credits": 2,
+      "status": "done"
+    },
+    {
+      "code": "MOB03",
+      "title": "Flutter UI Fundamentals",
+      "credits": 3,
+      "status": "active"
+    },
+    {
+      "code": "MOB04",
+      "title": "Navigation",
+      "credits": 2,
+      "status": "planned"
+    },
+    {
+      "code": "MOB05",
+      "title": "State Management",
+      "credits": 3,
+      "status": "planned"
+    }
+  ]
+}
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\ios\Flutter\AppFrameworkInfo.plist =====
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
+  <key>CFBundleExecutable</key>
+  <string>App</string>
+  <key>CFBundleIdentifier</key>
+  <string>io.flutter.flutter.app</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>App</string>
+  <key>CFBundlePackageType</key>
+  <string>FMWK</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+  <key>CFBundleSignature</key>
+  <string>????</string>
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
+</dict>
+</plist>
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\ios\Flutter\ephemeral\Packages\FlutterGeneratedPluginSwiftPackage\Package.swift =====
+
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+// Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterGeneratedPluginSwiftPackage",
+    platforms: [
+        .iOS("15.0")
+    ],
+    products: [
+        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
+    ],
+    dependencies: [
+        
+    ],
+    targets: [
+        .target(
+            name: "FlutterGeneratedPluginSwiftPackage"
+        )
+    ]
+)
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\ios\Flutter\ephemeral\Packages\FlutterGeneratedPluginSwiftPackage\Sources\FlutterGeneratedPluginSwiftPackage\FlutterGeneratedPluginSwiftPackage.swift =====
+
+//
+// Generated file. Do not edit.
+//
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\ios\Runner\AppDelegate.swift =====
+
+import Flutter
+import UIKit
+
+@main
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\ios\Runner\Info.plist =====
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Flutter Ui Fundamentals</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>flutter_ui_fundamentals</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+</dict>
+</plist>
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\ios\Runner\SceneDelegate.swift =====
+
+import Flutter
+import UIKit
+
+class SceneDelegate: FlutterSceneDelegate {
+
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\ios\Runner\Assets.xcassets\AppIcon.appiconset\Contents.json =====
+
+{
+  "images" : [
+    {
+      "size" : "20x20",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-20x20@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "20x20",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-20x20@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-29x29@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-29x29@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-29x29@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-40x40@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-40x40@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "60x60",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-60x60@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "60x60",
+      "idiom" : "iphone",
+      "filename" : "Icon-App-60x60@3x.png",
+      "scale" : "3x"
+    },
+    {
+      "size" : "20x20",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-20x20@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "20x20",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-20x20@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-29x29@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "29x29",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-29x29@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-40x40@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "40x40",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-40x40@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "76x76",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-76x76@1x.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "76x76",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-76x76@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "83.5x83.5",
+      "idiom" : "ipad",
+      "filename" : "Icon-App-83.5x83.5@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "1024x1024",
+      "idiom" : "ios-marketing",
+      "filename" : "Icon-App-1024x1024@1x.png",
+      "scale" : "1x"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\ios\Runner\Assets.xcassets\LaunchImage.imageset\Contents.json =====
+
+{
+  "images" : [
+    {
+      "idiom" : "universal",
+      "filename" : "LaunchImage.png",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "filename" : "LaunchImage@2x.png",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "filename" : "LaunchImage@3x.png",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\ios\Runner\Assets.xcassets\LaunchImage.imageset\README.md =====
+
+# Launch Screen Assets
+
+You can customize the launch screen with your own desired assets by replacing the image files in this directory.
+
+You can also do it by opening your Flutter project's Xcode project with `open ios/Runner.xcworkspace`, selecting `Runner/Assets.xcassets` in the Project Navigator and dropping in the desired images.
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\ios\Runner.xcodeproj\project.xcworkspace\xcshareddata\IDEWorkspaceChecks.plist =====
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDEDidComputeMac32BitWarning</key>
+	<true/>
+</dict>
+</plist>
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\ios\Runner.xcworkspace\xcshareddata\IDEWorkspaceChecks.plist =====
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDEDidComputeMac32BitWarning</key>
+	<true/>
+</dict>
+</plist>
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\ios\RunnerTests\RunnerTests.swift =====
+
+import Flutter
+import UIKit
+import XCTest
+
+class RunnerTests: XCTestCase {
+
+  func testExample() {
+    // If you add code to the Runner application, consider adding tests here.
+    // See https://developer.apple.com/documentation/xctest for more information about using XCTest.
+  }
+
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\constants.dart =====
+
+const String studentName = 'Kadek Ayu Aulia';
+const String studentId = '2415051041';
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\course_state.dart =====
+
+
+import 'package:flutter/foundation.dart';
+
+import 'models/course.dart';
+import 'repositories/course_repository.dart';
+
+class CourseProvider extends ChangeNotifier {
+  final CourseRepository repository;
+
+  CourseProvider(this.repository);
+
+  List<Course> courses = [];
+
+  bool isLoading = false;
+
+  String? error;
+
+  // Dipertahankan dari Tahap 10 untuk fitur favorite.
+  final Set<String> favorites = {};
+
+  Future<void> loadCourses() async {
+    isLoading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      courses = await repository.getCourses();
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void toggleFavorite(String id) {
+    if (favorites.contains(id)) {
+      favorites.remove(id);
+    } else {
+      favorites.add(id);
+    }
+
+    notifyListeners();
+  }
+}
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\http_get_test.dart =====
+
+
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import 'models/course.dart';
+
+
+const String apiUrl = 'https://jsonplaceholder.typicode.com/posts';
+
+Future<List<Course>> fetchCourses() async {
+  final response = await http.get(Uri.parse(apiUrl));
+
+  if (response.statusCode == 200) {
+    final List<dynamic> jsonList =
+        jsonDecode(response.body) as List<dynamic>;
+
+    return jsonList.map((json) {
+      final post = json as Map<String, dynamic>;
+
+      return Course(
+        id: post['id'] as int?,
+        code: 'POST-${post['userId']}',
+        title: post['title'] as String? ?? '',
+        credits: 0,
+        status: 'planned',
+      );
+    }).toList();
+  }
+
+  throw Exception('HTTP ${response.statusCode}');
+}
+
+Future<void> testFetchCourses() async {
+  try {
+    final courses = await fetchCourses();
+
+    debugPrint('Jumlah data diterima: ${courses.length}');
+
+    for (final course in courses.take(3)) {
+      debugPrint(
+        'Code: ${course.code}, '
+        'Title: ${course.title}, '
+        'Status: ${course.status}',
+      );
+    }
+  } catch (e) {
+    debugPrint('Gagal mengambil data: $e');
+  }
+}
+void testCourseJson() {
+  const course = Course(
+    id: 1,
+    code: 'MOB01',
+    title: 'Git & GitHub',
+    credits: 2,
+    status: 'done',
+  );
+
+  final json = course.toJson();
+  final restoredCourse = Course.fromJson(json);
+
+  debugPrint('Hasil toJson: $json');
+  debugPrint('Hasil fromJson: ${restoredCourse.code}');
+  debugPrint('Status course: ${restoredCourse.status}');
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\main.dart =====
+
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'constants.dart';
+import 'services/course_data_source.dart';
+import 'services/course_supabase_service.dart';
+import 'providers/course_provider.dart';
+import 'repositories/course_repository.dart';
+import 'screens/auth_page.dart';
+import 'screens/home_page.dart';
+import 'screens/courses_page.dart';
+import 'screens/favorites_page.dart';
+import 'screens/profile_page.dart';
+
+const String supabaseUrl =
+    'https://qscxrkgqvysjaliyupcf.supabase.co';
+
+// Gunakan kembali publishable/anon key yang sudah ada
+// pada main.dart milikmu sebelumnya.
+// Jangan menggantinya dengan service_role key.
+const String supabaseAnonKey = 'sb_publishable_aB6BsNU3QhvOkVqq2rMTew_9TpElf8A';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: supabaseUrl,
+    publishableKey: supabaseAnonKey,
+  );
+
+  final CourseDataSource dataSource = CourseSupabaseService();
+  final repository = CourseRepository(dataSource);
+
+  runApp(
+    ChangeNotifierProvider<CourseProvider>(
+      create: (_) => CourseProvider(repository)..loadCourses(),
+      child: const MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Course Explorer',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.pink,
+        ),
+        scaffoldBackgroundColor: Colors.pink.shade50,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.pink,
+          foregroundColor: Colors.white,
+        ),
+        cardTheme: const CardThemeData(
+          elevation: 3,
+        ),
+      ),
+      home: const AuthGate(
+        child: ResponsiveShell(),
+      ),
+    );
+  }
+}
+
+class ResponsiveShell extends StatefulWidget {
+  const ResponsiveShell({super.key});
+
+  @override
+  State<ResponsiveShell> createState() => _ResponsiveShellState();
+}
+
+class _ResponsiveShellState extends State<ResponsiveShell> {
+  int currentIndex = 0;
+
+  final Map<String, dynamic> studentData = {
+    'student': {
+      'name': studentName,
+      'nim': studentId,
+    },
+  };
+
+  Widget buildCurrentPage() {
+    if (currentIndex == 0) {
+      return HomePage(data: studentData);
+    }
+
+    if (currentIndex == 1) {
+      return CoursesPage(data: studentData);
+    }
+
+    if (currentIndex == 2) {
+      return FavoritesPage(data: studentData);
+    }
+
+    return ProfilePage(data: studentData);
+  }
+
+  Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text(
+          'Apakah kamu yakin ingin keluar dari akun?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext, false);
+            },
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext, true);
+            },
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await Supabase.instance.client.auth.signOut();
+      } catch (e) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal logout: $e'),
+          ),
+        );
+      }
+    }
+  }
+
+  NavigationBar buildNavigationBar() {
+    return NavigationBar(
+      selectedIndex: currentIndex,
+      onDestinationSelected: (index) {
+        setState(() {
+          currentIndex = index;
+        });
+      },
+      destinations: const [
+        NavigationDestination(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.school),
+          label: 'Courses',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.favorite),
+          label: 'Favorites',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ],
+    );
+  }
+
+  NavigationRail buildNavigationRail() {
+    return NavigationRail(
+      selectedIndex: currentIndex,
+      onDestinationSelected: (index) {
+        setState(() {
+          currentIndex = index;
+        });
+      },
+      destinations: const [
+        NavigationRailDestination(
+          icon: Icon(Icons.home),
+          label: Text('Home'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.school),
+          label: Text('Courses'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.favorite),
+          label: Text('Favorites'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.person),
+          label: Text('Profile'),
+        ),
+      ],
+    );
+  }
+// ==========================================
+// PRAKTIK 2: AUTHENTICATION SESSION & LOGOUT
+// ==========================================
+
+// Memeriksa session pengguna ketika aplikasi pertama kali dibuka.
+// Jika session masih aktif, pengguna diarahkan ke halaman utama.
+// Jika session tidak tersedia, pengguna diarahkan ke halaman login.
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Course Explorer'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            tooltip: 'Logout',
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
+          ),
+        ],
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final page = buildCurrentPage();
+
+          if (constraints.maxWidth < 840) {
+            return page;
+          }
+
+          return Row(
+            children: [
+              buildNavigationRail(),
+              const VerticalDivider(width: 1),
+              Expanded(child: page),
+            ],
+          );
+        },
+      ),
+      bottomNavigationBar: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 840) {
+            return buildNavigationBar();
+          }
+
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\models\course.dart =====
+
+
+class Course {
+  final int? id;
+  final String code;
+  final String title;
+  final int credits;
+  final String status;
+
+  const Course({
+    this.id,
+    required this.code,
+    required this.title,
+    required this.credits,
+    this.status = 'planned',
+  });
+
+  factory Course.fromJson(Map<String, dynamic> json) {
+    return Course(
+      id: json['id'] as int?,
+      code: json['code'] as String,
+      title: json['title'] as String,
+      credits: json['credits'] as int,
+      status: (json['status'] as String?) ?? 'planned',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'code': code,
+        'title': title,
+        'credits': credits,
+        'status': status,
+      };
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\providers\course_provider.dart =====
+
+
+import 'package:flutter/foundation.dart';
+
+import '../models/course.dart';
+import '../repositories/course_repository.dart';
+
+class CourseProvider extends ChangeNotifier {
+  final CourseRepository repository;
+
+  CourseProvider(this.repository);
+
+  List<Course> courses = [];
+
+  bool isLoading = false;
+  bool isSaving = false;
+  bool isDeleting = false;
+
+  String? error;
+  String? refreshError;
+
+  final Set<String> favorites = {};
+
+  bool isFavorite(String code) {
+    return favorites.contains(code);
+  }
+
+  void toggleFavorite(String code) {
+    if (favorites.contains(code)) {
+      favorites.remove(code);
+    } else {
+      favorites.add(code);
+    }
+
+    notifyListeners();
+  }
+
+  List<Course> get favoriteCourses {
+    return courses
+        .where((course) => favorites.contains(course.code))
+        .toList();
+  }
+
+  Future<void> loadCourses() async {
+    isLoading = true;
+    error = null;
+    refreshError = null;
+
+    notifyListeners();
+
+    try {
+      final loadedCourses = await repository.getCourses();
+      courses = loadedCourses;
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Course> createCourse(Course course) async {
+    if (isSaving || isDeleting) {
+      throw Exception('Operasi course sedang berlangsung.');
+    }
+
+    isSaving = true;
+    error = null;
+    refreshError = null;
+
+    notifyListeners();
+
+    try {
+      final createdCourse = await repository.createCourse(course);
+
+      try {
+        final loadedCourses = await repository.getCourses();
+        courses = loadedCourses;
+      } catch (e) {
+        refreshError = e.toString();
+      }
+
+      return createdCourse;
+    } catch (e) {
+      error = e.toString();
+      rethrow;
+    } finally {
+      isSaving = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Course> updateCourse(int id, Course course) async {
+    if (isSaving || isDeleting) {
+      throw Exception('Operasi course sedang berlangsung.');
+    }
+
+    isSaving = true;
+    error = null;
+    refreshError = null;
+
+    notifyListeners();
+
+    try {
+      final updatedCourse =
+          await repository.updateCourse(id, course);
+
+      try {
+        final loadedCourses = await repository.getCourses();
+        courses = loadedCourses;
+      } catch (e) {
+        refreshError = e.toString();
+      }
+
+      return updatedCourse;
+    } catch (e) {
+      error = e.toString();
+      rethrow;
+    } finally {
+      isSaving = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteCourse(int id) async {
+    if (isSaving || isDeleting) {
+      throw Exception('Operasi course sedang berlangsung.');
+    }
+
+    final courseIndex = courses.indexWhere(
+      (course) => course.id == id,
+    );
+
+    if (courseIndex == -1) {
+      throw Exception('Course tidak ditemukan.');
+    }
+
+    final course = courses[courseIndex];
+
+    isDeleting = true;
+    error = null;
+    refreshError = null;
+
+    notifyListeners();
+
+    try {
+      // 1. Kirim permintaan DELETE ke API.
+      await repository.deleteCourse(id);
+
+      // 2. Hapus course dari daftar lokal.
+      courses.removeWhere((item) => item.id == id);
+
+      // 3. Hapus juga favorite berdasarkan kode course.
+      favorites.remove(course.code);
+
+      // 4. Coba sinkronkan ulang daftar dari API.
+      // Kegagalan GET tidak membatalkan DELETE yang berhasil.
+      try {
+        final loadedCourses = await repository.getCourses();
+        courses = loadedCourses;
+
+        // Bersihkan favorite yang tidak lagi ada di daftar.
+        final validCodes = courses
+            .map((item) => item.code)
+            .toSet();
+
+        favorites.removeWhere(
+          (code) => !validCodes.contains(code),
+        );
+      } catch (e) {
+        refreshError = e.toString();
+      }
+    } catch (e) {
+      error = e.toString();
+      rethrow;
+    } finally {
+      isDeleting = false;
+      notifyListeners();
+    }
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\repositories\course_repository.dart =====
+
+
+import '../models/course.dart';
+import '../services/course_data_source.dart';
+
+class CourseRepository {
+  final CourseDataSource dataSource;
+
+  CourseRepository(this.dataSource);
+
+  Future<List<Course>> getCourses() {
+    return dataSource.getCourses();
+  }
+
+  Future<Course> createCourse(Course course) {
+    return dataSource.createCourse(course);
+  }
+
+  Future<Course> updateCourse(int id, Course course) {
+    return dataSource.updateCourse(id, course);
+  }
+
+  Future<void> deleteCourse(int id) {
+    return dataSource.deleteCourse(id);
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\screens\auth_page.dart =====
+
+
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../services/auth_service.dart';
+
+class AuthGate extends StatelessWidget {
+  final Widget child;
+
+  const AuthGate({
+    super.key,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final client = Supabase.instance.client;
+
+    return StreamBuilder<AuthState>(
+      stream: client.auth.onAuthStateChange,
+      builder: (context, snapshot) {
+        final session = snapshot.hasData
+            ? snapshot.data!.session
+            : client.auth.currentSession;
+
+        if (session == null) {
+          return const AuthPage();
+        }
+
+        return child;
+      },
+    );
+  }
+}
+
+class AuthPage extends StatefulWidget {
+  const AuthPage({super.key});
+
+  @override
+  State<AuthPage> createState() => _AuthPageState();
+}
+
+class _AuthPageState extends State<AuthPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  bool _isRegister = false;
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+
+  String _role = 'seeker';
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      if (_isRegister) {
+        final response = await AuthService.instance.register(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          name: _nameController.text.trim(),
+          role: _role,
+        );
+
+        if (!mounted) return;
+
+        if (response.session == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Registrasi berhasil. Silakan periksa email untuk konfirmasi akun.',
+              ),
+            ),
+          );
+        }
+      } else {
+        await AuthService.instance.login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+      }
+    } on AuthException catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password wajib diisi';
+    }
+
+    if (value.length < 6) {
+      return 'Password minimal 6 karakter';
+    }
+
+    if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d).+$').hasMatch(value)) {
+      return 'Password harus mengandung huruf dan angka';
+    }
+
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Card(
+              elevation: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.school,
+                        size: 64,
+                        color: Colors.pink,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Course Explorer',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _isRegister
+                            ? 'Buat akun baru'
+                            : 'Silakan login ke akun Anda',
+                      ),
+                      const SizedBox(height: 24),
+
+                      if (_isRegister) ...[
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Nama Lengkap',
+                            prefixIcon: Icon(Icons.person),
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Nama wajib diisi';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        DropdownButtonFormField<String>(
+                          initialValue: _role,
+                          decoration: const InputDecoration(
+                            labelText: 'Pilih Role Pengguna',
+                            prefixIcon: Icon(Icons.manage_accounts),
+                            border: OutlineInputBorder(),
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'seeker',
+                              child: Text('Pengguna (Seeker)'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'owner',
+                              child: Text('Pemilik (Owner)'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _role = value ?? 'seeker';
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Silakan pilih role pengguna';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: Icon(Icons.email),
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Email wajib diisi';
+                          }
+
+                          if (!RegExp(
+                            r'^[^@]+@[^@]+\.[^@]+$',
+                          ).hasMatch(value.trim())) {
+                            return 'Format email tidak valid';
+                          }
+
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: const Icon(Icons.lock),
+                          border: const OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                        ),
+                        validator: _validatePassword,
+                      ),
+                      const SizedBox(height: 24),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _submit,
+                          child: _isLoading
+                              ? const CircularProgressIndicator()
+                              : Text(
+                                  _isRegister ? 'Register' : 'Login',
+                                ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      TextButton(
+                        onPressed: _isLoading
+                            ? null
+                            : () {
+                                setState(() {
+                                  _isRegister = !_isRegister;
+                                  _role = 'seeker';
+                                  _formKey.currentState?.reset();
+                                });
+                              },
+                        child: Text(
+                          _isRegister
+                              ? 'Sudah punya akun? Login'
+                              : 'Belum punya akun? Register',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\screens\courses_page.dart =====
+
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../constants.dart';
+import '../models/course.dart';
+import '../providers/course_provider.dart';
+import '../services/profile_service.dart';
+import '../widgets/course_card.dart';
+import '../widgets/error_view.dart';
+import 'course_form_page.dart';
+
+class CoursesPage extends StatefulWidget {
+  final Map<String, dynamic> data;
+
+  const CoursesPage({
+    super.key,
+    required this.data,
+  });
+
+  @override
+  State<CoursesPage> createState() => _CoursesPageState();
+}
+
+class _CoursesPageState extends State<CoursesPage> {
+  late Future<UserProfile?> _profileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileFuture = ProfileService().getMyProfile();
+  }
+
+  int columnsFor(double width) {
+    if (width < 600) return 1;
+    if (width < 840) return 2;
+    return 3;
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    CourseProvider provider,
+    int id,
+    String code,
+    String title,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Hapus Course?'),
+          content: Text(
+            'Apakah kamu yakin ingin menghapus '
+            '"$title" ($code)?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
+              child: const Text('Hapus'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!context.mounted || confirmed != true) return;
+
+    try {
+      await provider.deleteCourse(id);
+
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Course "$title" berhasil dihapus.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menghapus course: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _openAddCourse() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const CourseFormPage(),
+      ),
+    );
+  }
+
+  void _openEditCourse(Course course) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CourseFormPage(
+          course: course,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<CourseProvider>();
+
+    return FutureBuilder<UserProfile?>(
+      future: _profileFuture,
+      builder: (context, profileSnapshot) {
+        final userRole = profileSnapshot.data?.role
+                .toLowerCase()
+                .trim() ??
+            '';
+
+        final canManageCourses =
+            userRole == 'owner' || userRole == 'admin';
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Identitas mahasiswa
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          studentName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'NIM: $studentId',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.pink.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Text(
+                    'â™¡',
+                    style: TextStyle(
+                      fontSize: 30,
+                      color: Colors.pink,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const Divider(height: 1),
+
+            // Judul daftar course
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Daftar Course',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+
+                  // Tombol tambah hanya untuk owner dan admin
+                  if (canManageCourses)
+                    IconButton(
+                      tooltip: 'Tambah Course',
+                      onPressed: provider.isSaving ||
+                              provider.isDeleting
+                          ? null
+                          : _openAddCourse,
+                      icon: const Icon(
+                        Icons.add_circle,
+                        color: Colors.pink,
+                        size: 30,
+                      ),
+                    ),
+
+                  const Icon(
+                    Icons.favorite,
+                    color: Colors.pink,
+                  ),
+                  const SizedBox(width: 4),
+                  Text('${provider.favorites.length}'),
+                ],
+              ),
+            ),
+
+            // Status data course
+            if (provider.isLoading)
+              const Expanded(
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.pink,
+                  ),
+                ),
+              )
+            else if (provider.error != null)
+              Expanded(
+                child: ErrorView(
+                  message: 'Terjadi error: ${provider.error}',
+                  onRetry: provider.loadCourses,
+                ),
+              )
+            else if (provider.courses.isEmpty)
+              const Expanded(
+                child: Center(
+                  child: Text('Data course belum tersedia'),
+                ),
+              )
+            else
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final columns =
+                        columnsFor(constraints.maxWidth);
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(12),
+                      gridDelegate:
+                          SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: columns,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        mainAxisExtent: 150,
+                      ),
+                      itemCount: provider.courses.length,
+                      itemBuilder: (context, index) {
+                        final course = provider.courses[index];
+
+                        return Stack(
+                          children: [
+                            Positioned.fill(
+                              child: CourseCard(
+                                course: course,
+                                studentData: widget.data,
+                              ),
+                            ),
+
+                            // Tombol edit dan hapus
+                            // hanya untuk owner dan admin
+                            if (canManageCourses) ...[
+                              Positioned(
+                                top: 4,
+                                right: 44,
+                                child: Material(
+                                  color: Colors.white,
+                                  shape: const CircleBorder(),
+                                  elevation: 2,
+                                  child: IconButton(
+                                    tooltip: 'Edit ${course.code}',
+                                    visualDensity:
+                                        VisualDensity.compact,
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Colors.pink,
+                                      size: 20,
+                                    ),
+                                    onPressed: provider.isSaving ||
+                                            provider.isDeleting
+                                        ? null
+                                        : () {
+                                            _openEditCourse(course);
+                                          },
+                                  ),
+                                ),
+                              ),
+
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: Material(
+                                  color: Colors.white,
+                                  shape: const CircleBorder(),
+                                  elevation: 2,
+                                  child: IconButton(
+                                    tooltip: 'Hapus ${course.code}',
+                                    visualDensity:
+                                        VisualDensity.compact,
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      color: Colors.red,
+                                      size: 20,
+                                    ),
+                                    onPressed: provider.isDeleting ||
+                                            provider.isSaving
+                                        ? null
+                                        : () {
+                                            final id = course.id;
+
+                                            if (id == null) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Course tidak memiliki ID.',
+                                                  ),
+                                                  backgroundColor:
+                                                      Colors.red,
+                                                ),
+                                              );
+                                              return;
+                                            }
+
+                                            _confirmDelete(
+                                              context,
+                                              provider,
+                                              id,
+                                              course.code,
+                                              course.title,
+                                            );
+                                          },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\screens\course_detail_page.dart =====
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../constants.dart';
+import '../models/course.dart';
+import '../providers/course_provider.dart';
+import '../widgets/student_header.dart';
+
+class CourseDetailPage extends StatelessWidget {
+  final Course course;
+  final Map<String, dynamic> studentData;
+
+  const CourseDetailPage({
+    super.key,
+    required this.course,
+    required this.studentData,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<CourseProvider>();
+    final isFavorite = provider.isFavorite(course.code);
+    final student =
+        studentData['student'] as Map<String, dynamic>;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Detail Course'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            StudentHeader(student: student),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      course.title,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text('Kode Course: ${course.code}'),
+                    const SizedBox(height: 8),
+                    Text('Jumlah SKS: ${course.credits}'),
+                    const SizedBox(height: 8),
+                    Text('Status: ${course.status}'),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Favorit',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: isFavorite
+                              ? 'Hapus dari favorit'
+                              : 'Tambahkan ke favorit',
+                          onPressed: () {
+                            provider.toggleFavorite(course.code);
+                          },
+                          icon: Icon(
+                            isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: isFavorite
+                                ? Colors.pink
+                                : Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 32),
+                    const Text(
+                      'Identitas Mahasiswa',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text('Nama: $studentName'),
+                    Text('NIM: $studentId'),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\screens\course_form_page.dart =====
+
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/course.dart';
+import '../providers/course_provider.dart';
+
+class CourseFormPage extends StatefulWidget {
+  final Course? course;
+
+  const CourseFormPage({
+    super.key,
+    this.course,
+  });
+
+  bool get isEditing => course != null;
+
+  @override
+  State<CourseFormPage> createState() => _CourseFormPageState();
+}
+
+class _CourseFormPageState extends State<CourseFormPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  final _codeController = TextEditingController();
+  final _titleController = TextEditingController();
+  final _creditsController = TextEditingController();
+
+  String _status = 'planned';
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Isi form dengan data lama jika sedang mengedit.
+    final course = widget.course;
+
+    if (course != null) {
+      _codeController.text = course.code;
+      _titleController.text = course.title;
+      _creditsController.text = course.credits.toString();
+      _status = course.status;
+    }
+  }
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    _titleController.dispose();
+    _creditsController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveCourse() async {
+    if (_isSubmitting) return;
+
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final provider = context.read<CourseProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    final existingCourse = widget.course;
+
+    // Saat edit, ID lama harus dipertahankan.
+    if (existingCourse != null && existingCourse.id == null) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Course tidak memiliki ID untuk diperbarui.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final course = Course(
+      id: existingCourse?.id,
+      code: _codeController.text.trim(),
+      title: _titleController.text.trim(),
+      credits: int.parse(_creditsController.text.trim()),
+      status: _status,
+    );
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      if (widget.isEditing) {
+        await provider.updateCourse(
+          existingCourse!.id!,
+          course,
+        );
+      } else {
+        await provider.createCourse(course);
+      }
+
+      if (!mounted) return;
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            widget.isEditing
+                ? 'Permintaan update course berhasil.'
+                : 'Course berhasil dibuat.',
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      navigator.pop();
+    } catch (e) {
+      if (!mounted) return;
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            '${widget.isEditing ? 'Gagal memperbarui' : 'Gagal membuat'} '
+            'course: $e',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<CourseProvider>();
+    final isSaving = _isSubmitting || provider.isSaving;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          widget.isEditing ? 'Edit Course' : 'Tambah Course',
+        ),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _codeController,
+                readOnly: widget.isEditing,
+                decoration: InputDecoration(
+                  labelText: 'Code',
+                  hintText: 'Contoh: PTI101',
+                  border: const OutlineInputBorder(),
+                  helperText: widget.isEditing
+                      ? 'Code tidak dapat diubah saat edit.'
+                      : null,
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Code wajib diisi.';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  hintText: 'Nama course',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Title wajib diisi.';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _creditsController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Credits',
+                  hintText: 'Contoh: 3',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Credits wajib diisi.';
+                  }
+
+                  if (int.tryParse(value.trim()) == null) {
+                    return 'Credits harus berupa angka bulat.';
+                  }
+
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              DropdownButtonFormField<String>(
+                initialValue: _status,
+                decoration: const InputDecoration(
+                  labelText: 'Status',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'planned',
+                    child: Text('Planned'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'active',
+                    child: Text('Active'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'done',
+                    child: Text('Done'),
+                  ),
+                ],
+                onChanged: isSaving
+                    ? null
+                    : (value) {
+                        if (value != null) {
+                          setState(() {
+                            _status = value;
+                          });
+                        }
+                      },
+              ),
+              const SizedBox(height: 24),
+
+              ElevatedButton.icon(
+                onPressed: isSaving ? null : _saveCourse,
+                icon: isSaving
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.save),
+                label: Text(
+                  isSaving
+                      ? 'Menyimpan...'
+                      : widget.isEditing
+                          ? 'Simpan Perubahan'
+                          : 'Simpan Course',
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.all(16),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\screens\favorites_page.dart =====
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/course_provider.dart';
+import '../widgets/course_card.dart';
+
+class FavoritesPage extends StatelessWidget {
+  final Map<String, dynamic> data;
+
+  const FavoritesPage({
+    super.key,
+    required this.data,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<CourseProvider>();
+    final favoriteCourses = provider.favoriteCourses;
+
+    if (provider.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.pink),
+      );
+    }
+
+    if (favoriteCourses.isEmpty) {
+      return const Center(
+        child: Text('Belum ada course favorit'),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(12),
+      itemCount: favoriteCourses.length,
+      itemBuilder: (context, index) {
+        return CourseCard(
+          course: favoriteCourses[index],
+          studentData: data,
+        );
+      },
+    );
+  }
+}
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\screens\home_page.dart =====
+
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/course_provider.dart';
+import '../widgets/student_header.dart';
+
+class HomePage extends StatelessWidget {
+  final Map<String, dynamic> data;
+
+  const HomePage({
+    super.key,
+    required this.data,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final courseProvider = context.watch<CourseProvider>();
+    final courses = courseProvider.courses;
+
+    final completedCourses = courses
+        .where((course) => course.status.toLowerCase() == 'done')
+        .length;
+
+    final student = data['student'] as Map<String, dynamic>;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          StudentHeader(student: student),
+          const SizedBox(height: 16),
+
+          // Progress Belajar
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Progress Belajar',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.menu_book,
+                              size: 32,
+                              color: Colors.pink,
+                            ),
+                            const SizedBox(height: 8),
+                            const Text('Total Course'),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${courses.length}',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.check_circle,
+                              size: 32,
+                              color: Colors.green,
+                            ),
+                            const SizedBox(height: 8),
+                            const Text('Selesai'),
+                            const SizedBox(height: 4),
+                            Text(
+                              '$completedCourses',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Course Terbaru
+          const Text(
+            'Course Terbaru',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          if (courseProvider.isLoading)
+            const Center(
+              child: CircularProgressIndicator(
+                color: Colors.pink,
+              ),
+            )
+          else if (courseProvider.error != null)
+            const Text('Data course tidak dapat dimuat.')
+          else if (courses.isEmpty)
+            const Text('Belum ada course.')
+          else
+            ...courses.take(3).map(
+              (course) => Card(
+                child: ListTile(
+                  title: Text(
+                    course.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '${course.code} â€¢ ${course.credits} SKS',
+                  ),
+                  trailing: Text(
+                    course.status,
+                    style: TextStyle(
+                      color: course.status.toLowerCase() == 'done'
+                          ? Colors.green
+                          : Colors.pink,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\screens\profile_page.dart =====
+
+
+import 'package:flutter/material.dart';
+
+import '../constants.dart';
+import '../widgets/student_header.dart';
+import '../services/profile_service.dart';
+
+class ProfilePage extends StatefulWidget {
+  final Map<String, dynamic> data;
+
+  const ProfilePage({
+    super.key,
+    required this.data,
+  });
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final _formKey = GlobalKey<FormState>();
+
+  final _nameController = TextEditingController();
+  final _nimController = TextEditingController();
+  final _commentController = TextEditingController();
+
+  final ProfileService _profileService = ProfileService();
+  late Future<UserProfile?> _profileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _nameController.text = studentName;
+    _nimController.text = studentId;
+
+    _profileFuture = _profileService.getMyProfile();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _nimController.dispose();
+    _commentController.dispose();
+
+    super.dispose();
+  }
+
+  void _submitFeedback() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Feedback berhasil dikirim'),
+      ),
+    );
+
+    _commentController.clear();
+  }
+
+  Widget _buildAccountProfile() {
+    return FutureBuilder<UserProfile?>(
+      future: _profileFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Gagal mengambil profil: ${snapshot.error}',
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
+          );
+        }
+
+        final profile = snapshot.data;
+
+        if (profile == null) {
+          return const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Data profil belum ditemukan.'),
+            ),
+          );
+        }
+
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Nama: ${profile.name}'),
+                const SizedBox(height: 8),
+                Text('Email: ${profile.email}'),
+                const SizedBox(height: 8),
+                Text('Role: ${profile.role.toUpperCase()}'),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final student = widget.data['student'] as Map<String, dynamic>;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          StudentHeader(student: student),
+
+          const SizedBox(height: 16),
+
+          const Text(
+            'Profil Akun Pengguna',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          _buildAccountProfile(),
+
+          const SizedBox(height: 24),
+
+          const Text(
+            'Profil Mahasiswa',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Text('Nama: $studentName'),
+          Text('NIM: $studentId'),
+
+          const SizedBox(height: 24),
+
+          const Text(
+            'Formulir Feedback',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nama',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Nama wajib diisi';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 12),
+
+                TextFormField(
+                  controller: _nimController,
+                  decoration: const InputDecoration(
+                    labelText: 'NIM',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'NIM wajib diisi';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 12),
+
+                TextFormField(
+                  controller: _commentController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Komentar',
+                    hintText: 'Minimal 5 karakter',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().length < 5) {
+                      return 'Komentar minimal 5 karakter';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _submitFeedback,
+                    child: const Text('Kirim Feedback'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\services\auth_service.dart =====
+
+
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class AuthService {
+  AuthService._();
+
+  static final AuthService instance = AuthService._();
+
+  final SupabaseClient _client = Supabase.instance.client;
+
+  // Mengambil pengguna yang sedang login.
+  User? get currentUser => _client.auth.currentUser;
+
+  // Register dengan Nama dan Role.
+  Future<AuthResponse> register({
+    required String email,
+    required String password,
+    String name = '',
+    String role = 'seeker',
+  }) {
+    return _client.auth.signUp(
+      email: email,
+      password: password,
+      data: {
+        'name': name,
+        'role': role,
+      },
+    );
+  }
+
+  // Login pengguna.
+  Future<AuthResponse> login({
+    required String email,
+    required String password,
+  }) {
+    return _client.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+  }
+
+  // Logout pengguna.
+  Future<void> logout() {
+    return _client.auth.signOut();
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\services\course_api_service.dart =====
+
+
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+
+import '../models/course.dart';
+import 'course_data_source.dart';
+
+class CourseApiService implements CourseDataSource {
+  final String baseUrl;
+
+  CourseApiService(this.baseUrl);
+
+  @override
+  Future<List<Course>> getCourses() async {
+    final uri = Uri.parse(baseUrl);
+
+    debugPrint('GET URL: $uri');
+
+    final response = await http.get(uri);
+
+    debugPrint('GET STATUS: ${response.statusCode}');
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Gagal mengambil data course: '
+        'HTTP ${response.statusCode}. '
+        'Respons: ${response.body}',
+      );
+    }
+
+    final List<dynamic> data =
+        jsonDecode(response.body) as List<dynamic>;
+
+    return data.map((item) {
+      final post = item as Map<String, dynamic>;
+
+      return Course(
+        id: post['id'] as int?,
+        code: 'POST-${post['userId']}',
+
+        // KASUS C â€“ JSON MAPPING ERROR
+        // Nama key sengaja dibuat salah.
+        // Kode ini menyebabkan kesalahan saat title dibaca.
+        title: post['title_wrong'] as String,
+
+        credits: 0,
+        status: 'planned',
+      );
+    }).toList();
+  }
+
+  @override
+  Future<Course> createCourse(Course course) async {
+    final uri = Uri.parse(baseUrl);
+
+    debugPrint('POST URL: $uri');
+
+    final response = await http.post(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(course.toJson()),
+    );
+
+    debugPrint('POST STATUS: ${response.statusCode}');
+    debugPrint('POST RESPONSE: ${response.body}');
+
+    if (response.statusCode == 200 ||
+        response.statusCode == 201) {
+      return Course.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+    }
+
+    throw Exception(
+      'Gagal menambahkan course: '
+      'HTTP ${response.statusCode}. '
+      'Respons: ${response.body}',
+    );
+  }
+
+  @override
+  Future<Course> updateCourse(int id, Course course) async {
+    final uri = Uri.parse('$baseUrl/$id');
+
+    debugPrint('PUT URL: $uri');
+
+    final response = await http.put(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(course.toJson()),
+    );
+
+    debugPrint('PUT STATUS: ${response.statusCode}');
+    debugPrint('PUT RESPONSE: ${response.body}');
+
+    if (response.statusCode >= 200 &&
+        response.statusCode < 300) {
+      return Course.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+    }
+
+    throw Exception(
+      'Gagal memperbarui course: '
+      'HTTP ${response.statusCode}. '
+      'Respons: ${response.body}',
+    );
+  }
+
+  @override
+  Future<void> deleteCourse(int id) async {
+    final uri = Uri.parse('$baseUrl/$id');
+
+    debugPrint('DELETE URL: $uri');
+
+    final response = await http.delete(uri);
+
+    debugPrint('DELETE STATUS: ${response.statusCode}');
+    debugPrint('DELETE RESPONSE: ${response.body}');
+
+    if (response.statusCode < 200 ||
+        response.statusCode >= 300) {
+      throw Exception(
+        'Gagal menghapus course: '
+        'HTTP ${response.statusCode}. '
+        'Respons: ${response.body}',
+      );
+    }
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\services\course_data_source.dart =====
+
+
+import '../models/course.dart';
+
+abstract class CourseDataSource {
+  Future<List<Course>> getCourses();
+
+  Future<Course> createCourse(Course course);
+
+  Future<Course> updateCourse(int id, Course course);
+
+  Future<void> deleteCourse(int id);
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\services\course_service.dart =====
+
+
+import 'dart:convert';
+
+import 'package:flutter/services.dart' show rootBundle;
+
+import '../models/course.dart';
+
+class CourseService {
+  // Membaca dan mengubah JSON asset menjadi Map.
+  // TAHAP 15 - KASUS C
+  // Simulasi kegagalan pemuatan data.
+  Future<Map<String, dynamic>> _loadJsonData() async {
+    final jsonString = await rootBundle.loadString(
+      'assets/data/student_data.json',
+    );
+
+    return jsonDecode(jsonString) as Map<String, dynamic>;
+  }
+
+  // Memuat seluruh data yang diperlukan aplikasi.
+  // Data courses diubah menjadi List<Course>.
+  Future<Map<String, dynamic>> loadData() async {
+    final data = await _loadJsonData();
+
+    final list = data['courses'] as List<dynamic>;
+
+    final courses = list
+        .map(
+          (item) => Course.fromJson(
+            item as Map<String, dynamic>,
+          ),
+        )
+        .toList();
+
+    return {
+      'student': data['student'],
+      'courses': courses,
+    };
+  }
+
+  // TAHAP 9 - Service mengembalikan List<Course>.
+  Future<List<Course>> loadCourses() async {
+    final data = await _loadJsonData();
+
+    final list = data['courses'] as List<dynamic>;
+
+    return list
+        .map(
+          (item) => Course.fromJson(
+            item as Map<String, dynamic>,
+          ),
+        )
+        .toList();
+  }
+}
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\services\course_supabase_service.dart =====
+
+
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../models/course.dart';
+import 'course_data_source.dart';
+
+class CourseSupabaseService implements CourseDataSource {
+  final supabase = Supabase.instance.client;
+
+  @override
+  Future<List<Course>> getCourses() async {
+    final data = await supabase
+        .from('courses')
+        .select()
+        .order('id');
+
+    return (data as List)
+        .map((e) => Course.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<Course> createCourse(Course course) async {
+    final userId = supabase.auth.currentUser?.id;
+
+    if (userId == null) {
+      throw Exception('Pengguna belum login.');
+    }
+
+    final payload = course.toJson()
+      ..remove('id');
+
+    // Mengisi owner_id dengan ID pengguna yang sedang login.
+    payload['owner_id'] = userId;
+
+    final row = await supabase
+        .from('courses')
+        .insert(payload)
+        .select()
+        .single();
+
+    return Course.fromJson(row);
+  }
+
+  @override
+  Future<Course> updateCourse(int id, Course course) async {
+    final payload = course.toJson()
+      ..remove('id');
+
+    final row = await supabase
+        .from('courses')
+        .update(payload)
+        .eq('id', id)
+        .select()
+        .single();
+
+    return Course.fromJson(row);
+  }
+
+  @override
+  Future<void> deleteCourse(int id) async {
+    await supabase
+        .from('courses')
+        .delete()
+        .eq('id', id);
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\services\profile_service.dart =====
+
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class UserProfile {
+  final String id;
+  final String email;
+  final String name;
+  final String role;
+
+  UserProfile({
+    required this.id,
+    required this.email,
+    required this.name,
+    required this.role,
+  });
+
+  factory UserProfile.fromMap(Map<String, dynamic> map) {
+    return UserProfile(
+      id: map['id'] as String,
+      email: (map['email'] ?? '') as String,
+      name: (map['name'] ?? '') as String,
+      role: (map['role'] ?? 'seeker') as String,
+    );
+  }
+}
+
+class ProfileService {
+  final SupabaseClient _client = Supabase.instance.client;
+
+  User? get currentUser => _client.auth.currentUser;
+
+  String? get currentUserRole => null;
+
+  Future<UserProfile?> getMyProfile() async {
+    final user = currentUser;
+
+    if (user == null) {
+      return null;
+    }
+
+    final data = await _client
+        .from('profiles')
+        .select('id, email, name, role')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (data == null) {
+      return null;
+    }
+
+    return UserProfile.fromMap(data);
+  }
+}
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\widgets\course_card.dart =====
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/course.dart';
+import '../providers/course_provider.dart';
+import '../screens/course_detail_page.dart';
+
+class CourseCard extends StatelessWidget {
+  final Course course;
+  final Map<String, dynamic> studentData;
+
+  const CourseCard({
+    super.key,
+    required this.course,
+    required this.studentData,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<CourseProvider>();
+    final isFavorite = provider.isFavorite(course.code);
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CourseDetailPage(
+                course: course,
+                studentData: studentData,
+              ),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Icon(
+                course.status.toLowerCase() == 'done'
+                    ? Icons.check_circle
+                    : Icons.menu_book,
+                color: course.status.toLowerCase() == 'done'
+                    ? Colors.green
+                    : Colors.pink,
+                size: 30,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      course.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(course.code),
+                    Text('${course.credits} SKS Â· ${course.status}'),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: isFavorite
+                    ? 'Hapus dari favorit'
+                    : 'Tambahkan ke favorit',
+                onPressed: () {
+                  provider.toggleFavorite(course.code);
+                },
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Colors.pink : Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\widgets\error_view.dart =====
+
+
+import 'package:flutter/material.dart';
+
+class ErrorView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const ErrorView({
+    super.key,
+    required this.message,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Colors.red,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Coba Lagi'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\widgets\role_guard.dart =====
+
+
+import 'package:flutter/material.dart';
+
+class RoleGuard extends StatelessWidget {
+  const RoleGuard({
+    super.key,
+    required this.role,
+    required this.allowed,
+    required this.child,
+  });
+
+  final String role;
+  final List<String> allowed;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return allowed.contains(role)
+        ? child
+        : const SizedBox.shrink();
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\lib\widgets\student_header.dart =====
+
+import 'package:flutter/material.dart';
+
+class StudentHeader extends StatelessWidget {
+  final Map<String, dynamic> student;
+
+  const StudentHeader({
+    super.key,
+    required this.student,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            const CircleAvatar(
+              radius: 40,
+              backgroundImage: AssetImage(
+                'assets/profile.jpeg',
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    student['name'] as String,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    student['nim'] as String,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.pink.shade700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\macos\Flutter\GeneratedPluginRegistrant.swift =====
+
+//
+//  Generated file. Do not edit.
+//
+
+import FlutterMacOS
+import Foundation
+
+import app_links
+import shared_preferences_foundation
+import url_launcher_macos
+
+func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+  AppLinksMacosPlugin.register(with: registry.registrar(forPlugin: "AppLinksMacosPlugin"))
+  SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))
+  UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\macos\Flutter\ephemeral\Packages\FlutterGeneratedPluginSwiftPackage\Package.swift =====
+
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+// Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterGeneratedPluginSwiftPackage",
+    platforms: [
+        .macOS("12.0")
+    ],
+    products: [
+        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
+    ],
+    dependencies: [
+        
+    ],
+    targets: [
+        .target(
+            name: "FlutterGeneratedPluginSwiftPackage"
+        )
+    ]
+)
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\macos\Flutter\ephemeral\Packages\FlutterGeneratedPluginSwiftPackage\Sources\FlutterGeneratedPluginSwiftPackage\FlutterGeneratedPluginSwiftPackage.swift =====
+
+//
+// Generated file. Do not edit.
+//
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\macos\Runner\AppDelegate.swift =====
+
+import Cocoa
+import FlutterMacOS
+
+@main
+class AppDelegate: FlutterAppDelegate {
+  override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    return true
+  }
+
+  override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
+    return true
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\macos\Runner\Info.plist =====
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIconFile</key>
+	<string></string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>$(PRODUCT_COPYRIGHT)</string>
+	<key>NSMainNibFile</key>
+	<string>MainMenu</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+</dict>
+</plist>
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\macos\Runner\MainFlutterWindow.swift =====
+
+import Cocoa
+import FlutterMacOS
+
+class MainFlutterWindow: NSWindow {
+  override func awakeFromNib() {
+    let flutterViewController = FlutterViewController()
+    let windowFrame = self.frame
+    self.contentViewController = flutterViewController
+    self.setFrame(windowFrame, display: true)
+
+    RegisterGeneratedPlugins(registry: flutterViewController)
+
+    super.awakeFromNib()
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\macos\Runner\Assets.xcassets\AppIcon.appiconset\Contents.json =====
+
+{
+  "images" : [
+    {
+      "size" : "16x16",
+      "idiom" : "mac",
+      "filename" : "app_icon_16.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "16x16",
+      "idiom" : "mac",
+      "filename" : "app_icon_32.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "32x32",
+      "idiom" : "mac",
+      "filename" : "app_icon_32.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "32x32",
+      "idiom" : "mac",
+      "filename" : "app_icon_64.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "128x128",
+      "idiom" : "mac",
+      "filename" : "app_icon_128.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "128x128",
+      "idiom" : "mac",
+      "filename" : "app_icon_256.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "256x256",
+      "idiom" : "mac",
+      "filename" : "app_icon_256.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "256x256",
+      "idiom" : "mac",
+      "filename" : "app_icon_512.png",
+      "scale" : "2x"
+    },
+    {
+      "size" : "512x512",
+      "idiom" : "mac",
+      "filename" : "app_icon_512.png",
+      "scale" : "1x"
+    },
+    {
+      "size" : "512x512",
+      "idiom" : "mac",
+      "filename" : "app_icon_1024.png",
+      "scale" : "2x"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\macos\Runner.xcodeproj\project.xcworkspace\xcshareddata\IDEWorkspaceChecks.plist =====
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDEDidComputeMac32BitWarning</key>
+	<true/>
+</dict>
+</plist>
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\macos\Runner.xcworkspace\xcshareddata\IDEWorkspaceChecks.plist =====
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDEDidComputeMac32BitWarning</key>
+	<true/>
+</dict>
+</plist>
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\macos\RunnerTests\RunnerTests.swift =====
+
+import Cocoa
+import FlutterMacOS
+import XCTest
+
+class RunnerTests: XCTestCase {
+
+  func testExample() {
+    // If you add code to the Runner application, consider adding tests here.
+    // See https://developer.apple.com/documentation/xctest for more information about using XCTest.
+  }
+
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\test\widget_test.dart =====
+
+// This is a basic Flutter widget test.
+//
+// To perform an interaction with a widget in your test, use the WidgetTester
+// utility in the flutter_test package. For example, you can send tap and scroll
+// gestures. You can also use WidgetTester to find child widgets in the widget
+// tree, read text, and verify that the values of widget properties are correct.
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:flutter_ui_fundamentals/main.dart';
+
+void main() {
+  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const MyApp());
+
+    // Verify that our counter starts at 0.
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
+
+    // Tap the '+' icon and trigger a frame.
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+
+    // Verify that our counter has incremented.
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsOneWidget);
+  });
+}
+
+
+===== FILE: C:\Users\putu\Desktop\project flutter\flutter_ui_fundamentals\web\manifest.json =====
+
+{
+    "name": "flutter_ui_fundamentals",
+    "short_name": "flutter_ui_fundamentals",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": "A new Flutter project.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
+

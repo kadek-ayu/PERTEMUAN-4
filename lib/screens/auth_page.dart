@@ -197,6 +197,10 @@ class _AuthPageState extends State<AuthPage> {
                               value: 'owner',
                               child: Text('Pemilik (Owner)'),
                             ),
+                            DropdownMenuItem(
+                              value: 'admin',
+                              child: Text('Administrator (Admin)'),
+                            ),
                           ],
                           onChanged: (value) {
                             setState(() {
