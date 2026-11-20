@@ -2,7 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
+import 'firebase_options.dart';
 import 'constants.dart';
 import 'services/course_data_source.dart';
 import 'services/course_supabase_service.dart';
@@ -18,18 +21,62 @@ import 'screens/profile_page.dart';
 const String supabaseUrl =
     'https://qscxrkgqvysjaliyupcf.supabase.co';
 
-// Gunakan publishable/anon key milik project Supabase.
-// Jangan gunakan service_role key di aplikasi Flutter.
 const String supabaseAnonKey =
     'sb_publishable_aB6BsNU3QhvOkVqq2rMTew_9TpElf8A';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Inisialisasi Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Inisialisasi Supabase
   await Supabase.initialize(
     url: supabaseUrl,
     publishableKey: supabaseAnonKey,
   );
+
+  // Meminta izin notifikasi
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  // Registrasi perangkat menggunakan Firebase Installation ID
+  final messaging = FirebaseMessaging.instance;
+
+  // Dengarkan hasil registrasi sebelum memanggil register()
+  messaging.onRegistered.listen(
+    (String installationId) {
+      debugPrint('================================');
+      debugPrint('FIREBASE INSTALLATION ID:');
+      debugPrint(installationId);
+      debugPrint('================================');
+    },
+    onError: (error) {
+      debugPrint('Gagal mendapatkan Installation ID: $error');
+    },
+  );
+
+  // Registrasikan perangkat ke Firebase Cloud Messaging
+  try {
+    await messaging.register();
+    debugPrint('Registrasi perangkat FCM berhasil.');
+  } catch (e) {
+    debugPrint('Gagal melakukan registrasi FCM: $e');
+  }
+
+  // Mendeteksi pesan ketika aplikasi sedang terbuka
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    debugPrint('================================');
+    debugPrint('NOTIFIKASI FCM DITERIMA');
+    debugPrint('Judul: ${message.notification?.title}');
+    debugPrint('Isi: ${message.notification?.body}');
+    debugPrint('================================');
+  });
 
   final CourseDataSource dataSource = CourseSupabaseService();
   final repository = CourseRepository(dataSource);
